@@ -5,11 +5,13 @@ from .core import client
 from .schemas import CedulaArbitralExtraida
 from google.genai import types
 
+# Lista de modelos válidos en producción con cuota habilitada (15 RPM / Free Tier)
 MODELOS_CANDIDATOS = [
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-3.5-flash",
+    "gemini-flash-latest",
+    "gemini-2.0-flash-lite",
 ]
 
 SYSTEM_PROMPT_COACH = """Eres un Director Técnico y Analista Táctico de fútbol de élite mundial con más de 30 años de experiencia.
@@ -93,4 +95,4 @@ async def procesar_cedula_vision(imagen_bytes: bytes) -> CedulaArbitralExtraida:
             ultimo_error = e
             await asyncio.sleep(4)
 
-    raise RuntimeError(f"Fallo en visión artificial en todos los modelos candidates. Error: {ultimo_error}")
+    raise RuntimeError(f"Fallo en visión artificial en todos los modelos candidatos. Error: {ultimo_error}")

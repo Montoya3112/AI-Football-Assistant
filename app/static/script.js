@@ -757,7 +757,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             removeTypingIndicator(typingId);
 
-            if (!resp.ok) throw new Error('Error en el servidor');
+            if (!resp.ok) {
+                const errData = await resp.json().catch(() => ({}));
+                throw new Error(errData.detail || 'Error en el servidor');
+            }
             const data = await resp.json();
             const reply = data.respuesta || 'Sin respuesta.';
             appendMessageDOM(reply, 'bot');
@@ -765,8 +768,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(err) {
             console.error(err);
             removeTypingIndicator(typingId);
-            appendMessageDOM('⚠️ Error de comunicación con el servidor.', 'bot');
-            showNotification('Error de conexión', 'error');
+            appendMessageDOM(`⚠️ Error: ${err.message || 'Error de comunicación con el servidor.'}`, 'bot');
+            showNotification(err.message || 'Error de conexión', 'error');
         }
     }
 
