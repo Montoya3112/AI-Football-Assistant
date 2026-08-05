@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportPdfBtn = $('export-pdf-btn');
     const exportExcelBtn = $('export-excel-btn');
     const exportTxtBtn = $('export-txt-btn');
+    const downloadCedulaPdfBtn = $('download-cedula-pdf-btn');
+    const downloadCedulaWordBtn = $('download-cedula-word-btn');
 
     // ═══ STATE ═══
     let currentUser = null;
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedImageFile = null;
     let conversations = [];
     let activeConvId = null;
+    let lastExtractedCedula = null;
 
     // ═══ INIT ═══
     function init() {
@@ -205,18 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 doc.save(`Reporte_Futbol_${Date.now()}.pdf`);
                 showNotification('PDF descargado correctamente 📄', 'success');
             } else {
-                // Fallback a ventana de impresión
-                const printWindow = window.open('', '_blank');
-                let html = `<html><head><title>Reporte Táctico</title><style>body{font-family:sans-serif;padding:20px;}h2{color:#7c6aef;}.msg{margin-bottom:12px;padding:10px;border-radius:6px;background:#f3f4f6;}.user{font-weight:bold;color:#1e40af;}</style></head><body>`;
-                html += `<h2>AI Football Assistant - Reporte Deportivo</h2><hr/>`;
-                conv.messages.forEach(m => {
-                    html += `<div class="msg"><span class="user">${m.sender === 'user' ? currentUser : 'AI DT'}:</span> ${escapeHtml(m.text)}</div>`;
-                });
-                html += `</body></html>`;
-                printWindow.document.write(html);
-                printWindow.document.close();
-                printWindow.print();
-                showNotification('Generando documento de impresión 📄', 'info');
+                window.print();
             }
         } catch (err) {
             console.error(err);
@@ -231,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let csvContent = "\uFEFF"; // UTF-8 BOM
+        let csvContent = "\uFEFF";
         csvContent += "ID_Conversacion,Remitente,Mensaje,Fecha\n";
 
         conv.messages.forEach((m, idx) => {
@@ -279,6 +271,120 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
         document.body.removeChild(a);
         showNotification('Archivo TXT descargado correctamente 📝', 'success');
+    }
+
+    // ════════════════════════════════════════
+    // DESCARGA DE CÉDULA RECONSTRUIDA (PDF Y WORD .DOCX)
+    // ════════════════════════════════════════
+    async function downloadCedulaWord() {
+        if (!lastExtractedCedula) {
+            showNotification('No hay una cédula procesada para exportar a Word.', 'error');
+            return;
+        }
+
+        try {
+            showNotification('Generando Cédula Oficial en formato Word (.docx)... ⏳', 'info');
+            const resp = await fetch('/api/v1/futbol/vision/export-doc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(lastExtractedCedula)
+            });
+
+            if (!resp.ok) throw new Error('Error backend docx');
+
+            const blob = await resp.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Cedula_Arbitral_${(lastExtractedCedula.equipo_local || 'Local').replace(/\s+/g, '_')}_vs_${(lastExtractedCedula.equipo_visitante || 'Visitante').replace(/\s+/g, '_')}.docx`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showNotification('Cédula en Word (.docx) descargada con éxito 📝', 'success');
+        } catch(err) {
+            console.error(err);
+            showNotification('Error al descargar el documento de Word', 'error');
+        }
+    }
+
+    function downloadCedulaPDF() {
+        if (!lastExtractedCedula) {
+            showNotification('No hay una cédula procesada para exportar a PDF.', 'error');
+            return;
+        }
+
+        try {
+            if (window.jspdf && window.jspdf.jsPDF) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const c = lastExtractedCedula;
+
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(16);
+                doc.text("CÉDULA ARBITRAL Y INFORME OFICIAL DE PARTIDO", 14, 18);
+
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                doc.text(`MRCA Solutions — Visión Artificial & OCR Futbolístico`, 14, 25);
+                doc.line(14, 28, 196, 28);
+
+                let y = 36;
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "bold");
+                doc.text(`INFORMACIÓN DEL PARTIDO`, 14, y); y += 8;
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(10);
+                doc.text(`• Equipo Local: ${c.equipo_local} (${c.goles_local} Goles)`, 14, y); y += 6;
+                doc.text(`• Equipo Visitante: ${c.equipo_visitante} (${c.goles_visitante} Goles)`, 14, y); y += 6;
+                doc.text(`• Fecha: ${c.fecha || 'No especificada'} | Estadio: ${c.estadio || 'No especificado'}`, 14, y); y += 6;
+                doc.text(`• Árbitro Central: ${c.arbitro || 'No especificado'}`, 14, y); y += 10;
+
+                // Plantilla Local
+                if (c.jugadores_local && c.jugadores_local.length > 0) {
+                    doc.setFont("helvetica", "bold");
+                    doc.text(`PLANTILLA LOCAL (${c.equipo_local}):`, 14, y); y += 6;
+                    doc.setFont("helvetica", "normal");
+                    c.jugadores_local.forEach(j => {
+                        doc.text(`  - N° ${j.numero || '-'}: ${j.nombre} (${j.posicion || 'Jugador'})`, 14, y);
+                        y += 5;
+                        if (y > 270) { doc.addPage(); y = 20; }
+                    });
+                    y += 4;
+                }
+
+                // Plantilla Visitante
+                if (c.jugadores_visitante && c.jugadores_visitante.length > 0) {
+                    doc.setFont("helvetica", "bold");
+                    doc.text(`PLANTILLA VISITANTE (${c.equipo_visitante}):`, 14, y); y += 6;
+                    doc.setFont("helvetica", "normal");
+                    c.jugadores_visitante.forEach(j => {
+                        doc.text(`  - N° ${j.numero || '-'}: ${j.nombre} (${j.posicion || 'Jugador'})`, 14, y);
+                        y += 5;
+                        if (y > 270) { doc.addPage(); y = 20; }
+                    });
+                    y += 4;
+                }
+
+                // Tarjetas
+                if (c.tarjetas_amarillas.length > 0 || c.tarjetas_rojas.length > 0) {
+                    doc.setFont("helvetica", "bold");
+                    doc.text(`SANCIÓN DE TARJETAS:`, 14, y); y += 6;
+                    doc.setFont("helvetica", "normal");
+                    c.tarjetas_amarillas.forEach(t => {
+                        doc.text(`  [Amarilla] ${t.jugador} (Min ${t.minuto || '-'})`, 14, y); y += 5;
+                    });
+                    c.tarjetas_rojas.forEach(t => {
+                        doc.text(`  [ROJA] ${t.jugador} (Min ${t.minuto || '-'})`, 14, y); y += 5;
+                    });
+                }
+
+                doc.save(`Cedula_Oficial_${(c.equipo_local||'Local').replace(/\s+/g,'_')}.pdf`);
+                showNotification('Cédula en PDF descargada con éxito 📄', 'success');
+            }
+        } catch(err) {
+            console.error(err);
+            showNotification('Error al generar PDF de la Cédula', 'error');
+        }
     }
 
     // ════════════════════════════════════════
@@ -700,7 +806,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function scrollToBottom() { chatMessages.scrollTop = chatMessages.scrollHeight; }
 
     // ════════════════════════════════════════
-    // VISION
+    // VISION / MANUSCRITO OCR
     // ════════════════════════════════════════
     function handleFileSelect(file) {
         if (!file || !file.type.startsWith('image/')) { showNotification('Selecciona una imagen válida.', 'error'); return; }
@@ -719,12 +825,13 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedImageFile = null; fileInput.value = ''; imagePreview.src = '';
         uploadPrompt.classList.remove('hidden'); imagePreviewContainer.classList.add('hidden');
         processVisionBtn.disabled = true; visionResults.classList.add('hidden');
+        lastExtractedCedula = null;
     }
 
     async function processVisionImage() {
         if (!selectedImageFile) return;
         processVisionBtn.disabled = true;
-        btnText.textContent = '🔄 Analizando...';
+        btnText.textContent = '🔄 Reconstruyendo Cédula...';
         spinnerEl.classList.remove('hidden');
         visionResults.classList.add('hidden');
 
@@ -741,27 +848,42 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (!resp.ok) throw new Error('Error processing');
             const data = await resp.json();
+            lastExtractedCedula = data.cedula;
+
             let html = '';
             if (data.cedula) {
                 const c = data.cedula;
                 html = `<table class="results-table">
-                    <tr><td class="label">⚽ Local</td><td>${c.equipo_local} <strong>${c.goles_local}</strong></td></tr>
-                    <tr><td class="label">⚽ Visitante</td><td>${c.equipo_visitante} <strong>${c.goles_visitante}</strong></td></tr>
+                    <tr><td class="label">⚽ Equipo Local</td><td><strong>${c.equipo_local}</strong> (${c.goles_local} Goles)</td></tr>
+                    <tr><td class="label">⚽ Equipo Visitante</td><td><strong>${c.equipo_visitante}</strong> (${c.goles_visitante} Goles)</td></tr>
                     ${c.fecha ? `<tr><td class="label">📅 Fecha</td><td>${c.fecha}</td></tr>` : ''}
                     ${c.estadio ? `<tr><td class="label">🏟️ Estadio</td><td>${c.estadio}</td></tr>` : ''}
-                    ${c.arbitro ? `<tr><td class="label">👨‍⚖️ Árbitro</td><td>${c.arbitro}</td></tr>` : ''}
+                    ${c.arbitro ? `<tr><td class="label">👨‍⚖️ Árbitro Central</td><td>${c.arbitro}</td></tr>` : ''}
                 </table>`;
-                if (data.inserted) html += `<p class="insert-badge">✅ Datos guardados en Supabase automáticamente</p>`;
-            } else { html = '<p>No se pudieron extraer datos.</p>'; }
+
+                if (c.jugadores_local && c.jugadores_local.length > 0) {
+                    html += `<div style="margin-top:14px;"><strong>Plantilla Local (${c.equipo_local}):</strong><ul style="margin-left:20px; font-size:13px;">`;
+                    c.jugadores_local.forEach(j => { html += `<li>N° ${j.numero||'-'}: ${j.nombre} (${j.posicion||'Jugador'})</li>`; });
+                    html += `</ul></div>`;
+                }
+
+                if (c.jugadores_visitante && c.jugadores_visitante.length > 0) {
+                    html += `<div style="margin-top:14px;"><strong>Plantilla Visitante (${c.equipo_visitante}):</strong><ul style="margin-left:20px; font-size:13px;">`;
+                    c.jugadores_visitante.forEach(j => { html += `<li>N° ${j.numero||'-'}: ${j.nombre} (${j.posicion||'Jugador'})</li>`; });
+                    html += `</ul></div>`;
+                }
+
+                if (data.inserted) html += `<p class="insert-badge">✅ Cédula Reconstruida y Registrada en Supabase automáticamente</p>`;
+            } else { html = '<p>No se pudieron extraer datos de la imagen.</p>'; }
             visionOutput.innerHTML = html;
             visionResults.classList.remove('hidden');
-            showNotification('Análisis completado ✅', 'success');
+            showNotification('Cédula Reconstruida con Éxito. ¡Elige PDF o Word para descargar! ✅', 'success');
         } catch(err) {
             console.error(err);
-            showNotification('Error al analizar la imagen.', 'error');
+            showNotification('Error al reconstruir la cédula.', 'error');
         } finally {
             processVisionBtn.disabled = false;
-            btnText.textContent = '🔍 Analizar Cédula con IA';
+            btnText.textContent = '🔍 Reconstruir Cédula con IA';
             spinnerEl.classList.add('hidden');
         }
     }
@@ -816,10 +938,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         newChatBtn.addEventListener('click', createNewChat);
 
-        // Export Buttons
+        // Chat Export Buttons
         if (exportPdfBtn) exportPdfBtn.addEventListener('click', exportToPDF);
         if (exportExcelBtn) exportExcelBtn.addEventListener('click', exportToExcel);
         if (exportTxtBtn) exportTxtBtn.addEventListener('click', exportToTXT);
+
+        // Vision Export Buttons
+        if (downloadCedulaPdfBtn) downloadCedulaPdfBtn.addEventListener('click', downloadCedulaPDF);
+        if (downloadCedulaWordBtn) downloadCedulaWordBtn.addEventListener('click', downloadCedulaWord);
 
         // Presets de Motivación
         document.querySelectorAll('.btn-motivation-preset').forEach(btn => {

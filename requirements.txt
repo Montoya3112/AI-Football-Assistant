@@ -4,3 +4,4 @@ python-dotenv
 supabase
 google-genai
 python-multipart
+python-docx

@@ -77,13 +77,13 @@
             <div class="nav-right">
                 <!-- EXPORT BAR -->
                 <div class="export-tools-bar">
-                    <button id="export-pdf-btn" class="btn-export pdf-btn" title="Descargar como PDF">
+                    <button id="export-pdf-btn" class="btn-export pdf-btn" title="Descargar chat como PDF">
                         📄 <span>PDF</span>
                     </button>
-                    <button id="export-excel-btn" class="btn-export excel-btn" title="Descargar como Excel / CSV">
+                    <button id="export-excel-btn" class="btn-export excel-btn" title="Descargar chat como Excel / CSV">
                         📊 <span>Excel</span>
                     </button>
-                    <button id="export-txt-btn" class="btn-export txt-btn" title="Descargar como Texto">
+                    <button id="export-txt-btn" class="btn-export txt-btn" title="Descargar chat como Texto">
                         📝 <span>TXT</span>
                     </button>
                 </div>
@@ -195,7 +195,7 @@
                     </div>
                 </section>
 
-                <!-- ═══ MOTIVATION VIEW (PANEL DEDICADO) ═══ -->
+                <!-- ═══ MOTIVATION VIEW ═══ -->
                 <section id="motivation-view" class="view-section hidden">
                     <div class="motivation-container custom-scrollbar">
                         <div class="view-header">
@@ -242,8 +242,8 @@
                     <div class="vision-container custom-scrollbar">
                         <div class="view-header">
                             <div class="header-icon">📋</div>
-                            <h2>Análisis de Cédulas Arbitrales</h2>
-                            <p>Sube una imagen de una cédula deportiva o acta de partido. La IA extraerá los datos y los guardará automáticamente.</p>
+                            <h2>Análisis OCR & Reconstrucción de Cédulas</h2>
+                            <p>Sube cualquier cédula o lista de jugadores (digital o escrita a mano, incluso borrosa). La IA extraerá los datos y generará tu documento oficial en PDF o Word.</p>
                         </div>
                         <div class="vision-workspace">
                             <div class="upload-zone" id="drop-zone">
@@ -253,8 +253,8 @@
                                         <div class="upload-ring"></div>
                                         <div class="upload-icon-inner">📸</div>
                                     </div>
-                                    <h3>Arrastra una imagen aquí</h3>
-                                    <p>o haz clic para seleccionar</p>
+                                    <h3>Arrastra tu cédula o lista aquí</h3>
+                                    <p>Soporta manuscritos a mano, escaneos e imágenes poco legibles</p>
                                     <span class="file-hint">JPG, PNG, WEBP • Máx 10MB</span>
                                 </div>
                                 <div class="preview-content hidden" id="image-preview-container">
@@ -266,14 +266,17 @@
                             </div>
                             <div class="action-bar">
                                 <button id="process-vision-btn" class="btn-primary gradient-btn btn-3d w-full" disabled>
-                                    <span class="btn-text">🔍 Analizar Cédula con IA</span>
+                                    <span class="btn-text">🔍 Reconstruir Cédula con IA</span>
                                     <span class="spinner hidden"></span>
                                 </button>
                             </div>
                             <div id="vision-results" class="results-card hidden">
                                 <div class="results-header">
-                                    <h3>📊 Resultados del Análisis</h3>
-                                    <span class="results-badge">Procesado con Gemini</span>
+                                    <h3>📊 Cédula Oficial Reconstruida</h3>
+                                    <div class="vision-actions-bar">
+                                        <button id="download-cedula-pdf-btn" class="btn-export pdf-btn">📄 Descargar PDF</button>
+                                        <button id="download-cedula-word-btn" class="btn-export excel-btn">📝 Descargar Word (.docx)</button>
+                                    </div>
                                 </div>
                                 <div id="vision-output" class="vision-output"></div>
                             </div>
@@ -297,8 +300,8 @@
                             </div>
                             <div class="feature-card-3d">
                                 <div class="fc-icon">👁️</div>
-                                <h3>Visión Artificial</h3>
-                                <p>Procesa cédulas arbitrales con Gemini Vision. Extrae automáticamente equipos, goles, tarjetas e incidencias del partido.</p>
+                                <h3>Visión & OCR Manuscrito</h3>
+                                <p>Procesa cédulas arbitrales manuscritas o borrosas. Reconstruye el acta oficial y permite descargarla en PDF y Word (.docx).</p>
                             </div>
                             <div class="feature-card-3d">
                                 <div class="fc-icon">📊</div>
@@ -318,6 +321,7 @@
                                 <span class="tech-badge">Python 3.10+</span>
                                 <span class="tech-badge">Gemini 2.5 Flash</span>
                                 <span class="tech-badge">Supabase</span>
+                                <span class="tech-badge">python-docx</span>
                                 <span class="tech-badge">jsPDF</span>
                             </div>
                         </div>
