@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Football Assistant | MRCA Solutions</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=1.1.0">
+    <link rel="stylesheet" href="/static/style.css?v=1.1.1">
     <!-- jsPDF for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -195,58 +195,40 @@
                         <!-- Input Bar -->
                         <div class="chat-input-bar">
                             <form id="chat-form" class="chat-input-form">
-                                <!-- SELECTOR DE LIGAS TOP 5 CON BANDERAS EN ALTA DEFINICIÓN (SVG) -->
+                                <!-- SELECTOR DE LIGAS CON BALONES ⚽ Y COPAS 🏆 ELEGANTES -->
                                 <div id="league-selector-wrapper" class="league-selector-wrapper">
                                     <span class="league-selector-label">🌐 Ligas Top:</span>
                                     <div class="league-chips-container custom-scrollbar">
-                                        <button type="button" class="league-chip active" data-league="Todas las Ligas" data-flag="⚽ ALL" data-name="Todas">
-                                            <span class="country-badge all"><span class="flag-icon-emoji">⚽</span> ALL</span>
+                                        <button type="button" class="league-chip active" data-league="Todas las Ligas" data-flag="⚽" data-name="Todas">
+                                            <span class="league-icon-badge ball-badge">⚽</span>
                                             <span class="league-name">Todas las Ligas</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="LaLiga EA Sports (España)" data-flag="🇪🇸 ES" data-name="LaLiga">
-                                            <span class="country-badge es">
-                                                <svg class="flag-svg" viewBox="0 0 640 480"><rect width="640" height="480" fill="#c60b1e"/><rect y="120" width="640" height="240" fill="#ffc400"/></svg>
-                                                ES
-                                            </span>
+                                        <button type="button" class="league-chip" data-league="LaLiga EA Sports (España)" data-flag="🏆" data-name="LaLiga">
+                                            <span class="league-icon-badge trophy-badge">🏆</span>
                                             <span class="league-name">LaLiga (España)</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="Premier League (Inglaterra)" data-flag="🏴󠁧󠁢󠁥󠁮󠁧󠁿 ENG" data-name="Premier League">
-                                            <span class="country-badge eng">
-                                                <svg class="flag-svg" viewBox="0 0 640 480"><rect width="640" height="480" fill="#fff"/><rect x="270" width="100" height="480" fill="#ce1124"/><rect y="190" width="640" height="100" fill="#ce1124"/></svg>
-                                                ENG
-                                            </span>
+                                        <button type="button" class="league-chip" data-league="Premier League (Inglaterra)" data-flag="🏆" data-name="Premier League">
+                                            <span class="league-icon-badge trophy-badge">🏆</span>
                                             <span class="league-name">Premier League (Inglaterra)</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="Serie A (Italia)" data-flag="🇮🇹 IT" data-name="Serie A">
-                                            <span class="country-badge it">
-                                                <svg class="flag-svg" viewBox="0 0 640 480"><rect width="213.3" height="480" fill="#009246"/><rect x="213.3" width="213.3" height="480" fill="#fff"/><rect x="426.6" width="213.3" height="480" fill="#ce2b37"/></svg>
-                                                IT
-                                            </span>
+                                        <button type="button" class="league-chip" data-league="Serie A (Italia)" data-flag="⚽" data-name="Serie A">
+                                            <span class="league-icon-badge ball-badge">⚽</span>
                                             <span class="league-name">Serie A (Italia)</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="Bundesliga (Alemania)" data-flag="🇩🇪 DE" data-name="Bundesliga">
-                                            <span class="country-badge de">
-                                                <svg class="flag-svg" viewBox="0 0 640 480"><rect width="640" height="160" fill="#000"/><rect y="160" width="640" height="160" fill="#dd0000"/><rect y="320" width="640" height="160" fill="#ffce00"/></svg>
-                                                DE
-                                            </span>
+                                        <button type="button" class="league-chip" data-league="Bundesliga (Alemania)" data-flag="⚽" data-name="Bundesliga">
+                                            <span class="league-icon-badge ball-badge">⚽</span>
                                             <span class="league-name">Bundesliga (Alemania)</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="UEFA Champions League" data-flag="🏆 EU" data-name="Champions League">
-                                            <span class="country-badge eu"><span class="flag-icon-emoji">🏆</span> EU</span>
+                                        <button type="button" class="league-chip" data-league="UEFA Champions League" data-flag="🏆" data-name="Champions League">
+                                            <span class="league-icon-badge trophy-badge gold-glow">🏆</span>
                                             <span class="league-name">Champions League (Europa)</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="Liga MX (México)" data-flag="🇲🇽 MX" data-name="Liga MX">
-                                            <span class="country-badge mx">
-                                                <svg class="flag-svg" viewBox="0 0 640 480"><rect width="213.3" height="480" fill="#006847"/><rect x="213.3" width="213.3" height="480" fill="#fff"/><rect x="426.6" width="213.3" height="480" fill="#ce1126"/><circle cx="320" cy="240" r="30" fill="#a25c27"/></svg>
-                                                MX
-                                            </span>
+                                        <button type="button" class="league-chip" data-league="Liga MX (México)" data-flag="⚽" data-name="Liga MX">
+                                            <span class="league-icon-badge ball-badge">⚽</span>
                                             <span class="league-name">Liga MX (México)</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="Ligue 1 (Francia)" data-flag="🇫🇷 FR" data-name="Ligue 1">
-                                            <span class="country-badge fr">
-                                                <svg class="flag-svg" viewBox="0 0 640 480"><rect width="213.3" height="480" fill="#002395"/><rect x="213.3" width="213.3" height="480" fill="#fff"/><rect x="426.6" width="213.3" height="480" fill="#ed2939"/></svg>
-                                                FR
-                                            </span>
+                                        <button type="button" class="league-chip" data-league="Ligue 1 (Francia)" data-flag="⚽" data-name="Ligue 1">
+                                            <span class="league-icon-badge ball-badge">⚽</span>
                                             <span class="league-name">Ligue 1 (Francia)</span>
                                         </button>
                                     </div>
@@ -494,6 +476,6 @@
 
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
-    <script src="/static/script.js?v=1.1.0"></script>
+    <script src="/static/script.js?v=1.1.1"></script>
 </body>
 </html>
