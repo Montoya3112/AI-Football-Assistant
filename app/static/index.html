@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Football Assistant | MRCA Solutions</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=1.1.3">
+    <link rel="stylesheet" href="/static/style.css?v=1.1.4">
     <!-- jsPDF for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -364,7 +364,9 @@
                                 </button>
                             </div>
 
-                            <div class="nn-canvas-container">
+                            <div class="nn-canvas-container" id="nn-canvas-container">
+                                <!-- SVG connections overlay -->
+                                <svg id="nn-connections-svg" class="nn-connections-svg" xmlns="http://www.w3.org/2000/svg"></svg>
                                 <!-- Input Layer Column -->
                                 <div class="nn-layer nn-input-layer">
                                     <div class="layer-title">ENTRADAS (Inputs)</div>
@@ -424,6 +426,8 @@
                                 <div class="metric-item"><span class="m-label">Pesos Ajustados:</span> <span class="m-val" id="nn-weights">1,750,000</span></div>
                                 <div class="metric-item"><span class="m-label">Tiempo Respuesta:</span> <span class="m-val cyan" id="nn-latency">0.24s</span></div>
                             </div>
+                            <!-- Epoch Log -->
+                            <div id="nn-epoch-log" class="nn-epoch-log" style="display:none;"></div>
                         </div>
 
                         <div class="features-grid">
@@ -472,6 +476,6 @@
 
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
-    <script src="/static/script.js?v=1.1.3"></script>
+    <script src="/static/script.js?v=1.1.4"></script>
 </body>
 </html>

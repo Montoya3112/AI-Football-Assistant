@@ -1260,37 +1260,225 @@ document.addEventListener('DOMContentLoaded', () => {
         if (downloadCedulaPdfBtn) downloadCedulaPdfBtn.addEventListener('click', downloadCedulaPDF);
         if (downloadCedulaWordBtn) downloadCedulaWordBtn.addEventListener('click', downloadCedulaWord);
 
-        // Simulator para Red Neuronal 4D en Acerca de
+        // ════════════════════════════════════════
+        // RED NEURONAL 4D — SIMULACIÓN COMPLETA
+        // ════════════════════════════════════════
         if (triggerLearningBtn) {
-            triggerLearningBtn.addEventListener('click', () => {
-                const weightsEl = $('nn-weights');
-                const accEl = $('nn-acc');
-                const latencyEl = $('nn-latency');
-                const statusEl = $('nn-status');
+            // Draw static SVG connections once the about view is shown
+            function drawNNConnections() {
+                const svg = document.getElementById('nn-connections-svg');
+                const container = document.getElementById('nn-canvas-container');
+                if (!svg || !container) return;
+                svg.innerHTML = '';
 
-                if (statusEl) {
-                    statusEl.textContent = '⚡ Ajustando Pesos Neuronal 4D...';
-                    statusEl.className = 'm-val cyan';
+                const cRect = container.getBoundingClientRect();
+
+                // Gather node groups: inputs, hidden1, hidden2, outputs
+                const inputNodes  = container.querySelectorAll('.nn-input-layer  .nn-node');
+                const h1Nodes     = container.querySelectorAll('.nn-hidden-layer-1 .nn-node');
+                const h2Nodes     = container.querySelectorAll('.nn-hidden-layer-2 .nn-node');
+                const outputNodes = container.querySelectorAll('.nn-output-layer  .nn-node');
+
+                svg.setAttribute('width',  cRect.width);
+                svg.setAttribute('height', cRect.height);
+                svg.style.width  = cRect.width  + 'px';
+                svg.style.height = cRect.height + 'px';
+
+                function center(el) {
+                    const r = el.getBoundingClientRect();
+                    return {
+                        x: r.left - cRect.left + r.width  / 2,
+                        y: r.top  - cRect.top  + r.height / 2
+                    };
                 }
 
-                document.querySelectorAll('.pulse-node').forEach(n => {
-                    n.style.animation = 'nodePulse 0.4s infinite ease-in-out';
+                function connect(fromList, toList, color) {
+                    fromList.forEach(f => {
+                        const fc = center(f);
+                        toList.forEach(t => {
+                            const tc = center(t);
+                            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                            line.setAttribute('x1', fc.x); line.setAttribute('y1', fc.y);
+                            line.setAttribute('x2', tc.x); line.setAttribute('y2', tc.y);
+                            line.setAttribute('stroke', color);
+                            line.setAttribute('stroke-width', '1');
+                            line.setAttribute('opacity', '0.18');
+                            line.classList.add('nn-static-line');
+                            svg.appendChild(line);
+                        });
+                    });
+                }
+
+                connect(inputNodes,  h1Nodes,     '#7c3aed');
+                connect(h1Nodes,     h2Nodes,     '#0ea5e9');
+                connect(h2Nodes,     outputNodes, '#10b981');
+            }
+
+            function animateSignalPulse(fromEl, toEl, color, delay) {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        const svg = document.getElementById('nn-connections-svg');
+                        const container = document.getElementById('nn-canvas-container');
+                        if (!svg || !container) { resolve(); return; }
+                        const cRect = container.getBoundingClientRect();
+                        const fr = fromEl.getBoundingClientRect();
+                        const tr = toEl.getBoundingClientRect();
+                        const x1 = fr.left - cRect.left + fr.width/2;
+                        const y1 = fr.top  - cRect.top  + fr.height/2;
+                        const x2 = tr.left - cRect.left + tr.width/2;
+                        const y2 = tr.top  - cRect.top  + tr.height/2;
+
+                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circle.setAttribute('r', '5');
+                        circle.setAttribute('fill', color);
+                        circle.setAttribute('filter', `drop-shadow(0 0 6px ${color})`);
+                        circle.setAttribute('cx', x1);
+                        circle.setAttribute('cy', y1);
+                        svg.appendChild(circle);
+
+                        const anim = circle.animate([
+                            { transform: `translate(0px, 0px)`, opacity: 1 },
+                            { transform: `translate(${x2-x1}px, ${y2-y1}px)`, opacity: 0.9 }
+                        ], { duration: 500, easing: 'ease-in-out', fill: 'forwards' });
+
+                        anim.onfinish = () => {
+                            circle.remove();
+                            // Flash the target node
+                            toEl.style.boxShadow = `0 0 22px 6px ${color}`;
+                            toEl.style.transition = 'box-shadow 0.15s';
+                            setTimeout(() => { toEl.style.boxShadow = ''; }, 350);
+                            resolve();
+                        };
+                    }, delay);
+                });
+            }
+
+            async function runSimulation4D() {
+                const weightsEl  = document.getElementById('nn-weights');
+                const accEl      = document.getElementById('nn-acc');
+                const latencyEl  = document.getElementById('nn-latency');
+                const statusEl   = document.getElementById('nn-status');
+                const epochLog   = document.getElementById('nn-epoch-log');
+                const container  = document.getElementById('nn-canvas-container');
+
+                if (!container) { showNotification('Abre la sección "Acerca de" primero', 'error'); return; }
+
+                // Disable button during simulation
+                triggerLearningBtn.disabled = true;
+                triggerLearningBtn.textContent = '⏳ Simulando...';
+
+                // Draw connections fresh
+                drawNNConnections();
+
+                // Show epoch log
+                if (epochLog) { epochLog.innerHTML = ''; epochLog.style.display = 'block'; }
+
+                if (statusEl) { statusEl.textContent = '⚡ Inicializando Pesos 4D...'; statusEl.className = 'm-val cyan'; }
+
+                const inputNodes  = Array.from(container.querySelectorAll('.nn-input-layer  .nn-node'));
+                const h1Nodes     = Array.from(container.querySelectorAll('.nn-hidden-layer-1 .nn-node'));
+                const h2Nodes     = Array.from(container.querySelectorAll('.nn-hidden-layer-2 .nn-node'));
+                const outputNodes = Array.from(container.querySelectorAll('.nn-output-layer  .nn-node'));
+
+                // Pulse all nodes quickly
+                [...inputNodes, ...h1Nodes, ...h2Nodes, ...outputNodes].forEach(n => {
+                    n.style.animation = 'nodePulse 0.3s infinite ease-in-out';
                 });
 
-                setTimeout(() => {
-                    if (weightsEl) weightsEl.textContent = (1750000 + Math.floor(Math.random() * 50000)).toLocaleString();
-                    if (accEl) accEl.textContent = (99.4 + (Math.random() * 0.4)).toFixed(1) + '%';
-                    if (latencyEl) latencyEl.textContent = (0.15 + (Math.random() * 0.1)).toFixed(2) + 's';
-                    if (statusEl) {
-                        statusEl.textContent = '● Aprendizaje Optimizado 4D';
-                        statusEl.className = 'm-val green';
+                const epochs = 5;
+                const epochMessages = [
+                    '🔄 Época 1 — Propagación hacia adelante iniciada',
+                    '🔁 Época 2 — Gradiente descendente aplicado',
+                    '⚡ Época 3 — Atención táctica ajustada',
+                    '📈 Época 4 — Pesos convergiendo...',
+                    '✅ Época 5 — Optimización 4D completada'
+                ];
+
+                let baseWeights = 1750000;
+
+                for (let ep = 0; ep < epochs; ep++) {
+                    await new Promise(r => setTimeout(r, 200));
+
+                    if (statusEl) { statusEl.textContent = `⚡ Entrenando Época ${ep+1}/${epochs}...`; }
+
+                    // Log epoch
+                    if (epochLog) {
+                        const loss = (2.4 - ep * 0.42 + Math.random() * 0.05).toFixed(4);
+                        const acc  = (95 + ep * 0.95 + Math.random() * 0.2).toFixed(2);
+                        const line = document.createElement('div');
+                        line.className = 'epoch-line';
+                        line.innerHTML = `<span class="ep-num">Época ${ep+1}</span> — Loss: <span class="ep-loss">${loss}</span> | Acc: <span class="ep-acc">${acc}%</span> | ${epochMessages[ep]}`;
+                        epochLog.appendChild(line);
+                        epochLog.scrollTop = epochLog.scrollHeight;
                     }
-                    document.querySelectorAll('.pulse-node').forEach(n => {
-                        n.style.animation = 'nodePulse 3s infinite ease-in-out';
+
+                    // Animate signal: input → h1 → h2 → output
+                    const pulses = [];
+                    inputNodes.forEach((inp, i) => {
+                        h1Nodes.forEach((h1, j) => {
+                            if ((i + j) % 2 === 0)
+                                pulses.push(animateSignalPulse(inp, h1, '#7c3aed', j * 60));
+                        });
                     });
-                    showNotification('¡Simulación de Aprendizaje 4D Completada! Pesos Neuronales Ajustados ✅', 'success');
-                }, 1500);
-            });
+                    await Promise.all(pulses);
+
+                    const pulses2 = [];
+                    h1Nodes.forEach((h1, i) => {
+                        h2Nodes.forEach((h2, j) => {
+                            if ((i + j) % 2 === 0)
+                                pulses2.push(animateSignalPulse(h1, h2, '#0ea5e9', j * 55));
+                        });
+                    });
+                    await Promise.all(pulses2);
+
+                    const pulses3 = [];
+                    h2Nodes.forEach((h2, i) => {
+                        outputNodes.forEach((out, j) => {
+                            pulses3.push(animateSignalPulse(h2, out, '#10b981', j * 70));
+                        });
+                    });
+                    await Promise.all(pulses3);
+
+                    // Update metrics per epoch
+                    baseWeights += Math.floor(Math.random() * 8000 + 5000);
+                    if (weightsEl) weightsEl.textContent = baseWeights.toLocaleString();
+                    if (accEl)     accEl.textContent     = (95 + ep * 0.95 + Math.random() * 0.2).toFixed(1) + '%';
+                    if (latencyEl) latencyEl.textContent = (0.28 - ep * 0.02 + Math.random() * 0.01).toFixed(2) + 's';
+
+                    await new Promise(r => setTimeout(r, 300));
+                }
+
+                // Final state
+                [...inputNodes, ...h1Nodes, ...h2Nodes, ...outputNodes].forEach(n => {
+                    n.style.animation = 'nodePulse 3s infinite ease-in-out';
+                });
+
+                if (statusEl) { statusEl.textContent = '● Aprendizaje Optimizado 4D'; statusEl.className = 'm-val green'; }
+                if (accEl)     accEl.textContent     = (99.4 + Math.random() * 0.5).toFixed(1) + '%';
+                if (latencyEl) latencyEl.textContent = (0.15 + Math.random() * 0.05).toFixed(2) + 's';
+                if (weightsEl) weightsEl.textContent = (baseWeights + Math.floor(Math.random() * 5000)).toLocaleString();
+
+                // Add final log entry
+                if (epochLog) {
+                    const done = document.createElement('div');
+                    done.className = 'epoch-line epoch-done';
+                    done.innerHTML = `🏆 <strong>Simulación 4D completa</strong> — Red neuronal optimizada con precisión táctica máxima.`;
+                    epochLog.appendChild(done);
+                    epochLog.scrollTop = epochLog.scrollHeight;
+                }
+
+                triggerLearningBtn.disabled = false;
+                triggerLearningBtn.textContent = '⚡ Simular Aprendizaje 4D';
+                showNotification('¡Simulación 4D completada! Red neuronal optimizada ✅', 'success');
+            }
+
+            triggerLearningBtn.addEventListener('click', runSimulation4D);
+
+            // Re-draw connections whenever the about view becomes visible
+            const aboutNavItem = document.querySelector('.nav-item[data-view="about-view"]');
+            if (aboutNavItem) {
+                aboutNavItem.addEventListener('click', () => setTimeout(drawNNConnections, 150));
+            }
         }
 
         // Presets de Motivación
