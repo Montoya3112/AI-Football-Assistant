@@ -110,22 +110,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ════════════════════════════════════════
-    // 3D TILT
+    // 3D TILT & PARALLAX DE BALONES Y PORTERÍAS
     // ════════════════════════════════════════
     function init3DTilt() {
         if (!loginCard) return;
-        const persp = loginCard.closest('.login-perspective');
-        if (!persp) return;
-        persp.addEventListener('mousemove', e => {
-            const r = persp.getBoundingClientRect();
-            const x = e.clientX - r.left, y = e.clientY - r.top;
-            const rX = ((y - r.height/2) / (r.height/2)) * -8;
-            const rY = ((x - r.width/2) / (r.width/2)) * 8;
+        const screen = $('login-screen');
+        if (!screen) return;
+
+        screen.addEventListener('mousemove', e => {
+            const w = window.innerWidth, h = window.innerHeight;
+            const mouseX = (e.clientX - w / 2) / (w / 2);
+            const mouseY = (e.clientY - h / 2) / (h / 2);
+
+            const rX = mouseY * -10;
+            const rY = mouseX * 10;
+
             loginCard.style.transform = `perspective(1000px) rotateX(${rX}deg) rotateY(${rY}deg) scale(1.02)`;
-            loginCard.style.setProperty('--mouse-x', (x/r.width*100)+'%');
-            loginCard.style.setProperty('--mouse-y', (y/r.height*100)+'%');
+            loginCard.style.setProperty('--mouse-x', ((e.clientX / w) * 100) + '%');
+            loginCard.style.setProperty('--mouse-y', ((e.clientY / h) * 100) + '%');
+
+            // Parallax 3D interactivo en Balones, Porterías y Trofeos
+            const balls = document.querySelectorAll('.floating-3d-ball');
+            balls.forEach((b, idx) => {
+                const depth = (idx + 1) * 22;
+                b.style.transform = `translate3d(${mouseX * depth}px, ${mouseY * depth}px, ${depth}px) rotate(${mouseX * 40}deg)`;
+            });
+
+            const goals = document.querySelectorAll('.floating-3d-goal');
+            goals.forEach((g, idx) => {
+                const depth = (idx + 1) * -35;
+                g.style.transform = `translate3d(${mouseX * depth}px, ${mouseY * depth}px, ${depth}px) rotateY(${mouseX * 25}deg)`;
+            });
+
+            const trophy = document.querySelector('.floating-3d-trophy');
+            if (trophy) {
+                trophy.style.transform = `translate3d(${mouseX * -15}px, ${mouseY * -15}px, 15px) rotate(${mouseX * -20}deg)`;
+            }
         });
-        persp.addEventListener('mouseleave', () => {
+
+        screen.addEventListener('mouseleave', () => {
             loginCard.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
         });
     }

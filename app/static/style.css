@@ -129,12 +129,78 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 @keyframes glowPulse { 0%,100%{box-shadow:0 0 15px var(--accent-glow)} 50%{box-shadow:0 0 35px var(--accent-glow)} }
 @keyframes nodePulse { 0%,100%{transform:scale(1);box-shadow:0 0 10px var(--accent-glow)} 50%{transform:scale(1.15);box-shadow:0 0 25px var(--accent-glow)} }
 
+/* 3D FLOATING ANIMATIONS FOR BALLS & GOALS */
+@keyframes floatBall3D {
+    0% { transform: translateY(0) rotate(0deg) scale(1) translateZ(0); }
+    50% { transform: translateY(-45px) rotate(180deg) scale(1.18) translateZ(60px); }
+    100% { transform: translateY(25px) rotate(360deg) scale(0.88) translateZ(-40px); }
+}
+
+@keyframes floatGoal3D {
+    0% { transform: translateY(0) rotateY(25deg) rotateX(10deg) scale(1); }
+    50% { transform: translateY(-35px) rotateY(-15deg) rotateX(-5deg) scale(1.12); }
+    100% { transform: translateY(20px) rotateY(20deg) rotateX(8deg) scale(0.92); }
+}
+
+@keyframes floatTrophy3D {
+    0% { transform: translateY(0) rotate(-12deg) scale(1); }
+    50% { transform: translateY(-30px) rotate(18deg) scale(1.15); }
+    100% { transform: translateY(15px) rotate(-8deg) scale(0.92); }
+}
+
 /* ═══════════════════════════════════════════
-   LOGIN SCREEN
+   LOGIN SCREEN (3D ELEMENTOS FUTBOLÍSTICOS)
    ═══════════════════════════════════════════ */
-.login-overlay { position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.5s ease; }
+.login-overlay { position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.5s ease; perspective:1200px; }
 .login-overlay.active { opacity:1; pointer-events:all; }
 .login-background { position:absolute; inset:0; background:linear-gradient(-45deg,#070710,#0d1b2a,#1b2838,#14002e,#1a0938,#070710); background-size:600% 600%; animation:gradientBg 20s ease infinite; z-index:-2; }
+
+/* Contenedor de Balones y Porterías 3D */
+.login-3d-elements-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+.floating-3d-ball {
+    position: absolute;
+    font-size: 56px;
+    filter: drop-shadow(0 12px 25px rgba(0,0,0,0.8)) drop-shadow(0 0 25px rgba(139,92,246,0.5));
+    animation: floatBall3D 12s ease-in-out infinite alternate;
+    user-select: none;
+    transition: transform 0.1s ease-out;
+}
+.ball-1 { top: 12%; left: 8%; font-size: 68px; animation-duration: 10s; }
+.ball-2 { top: 62%; right: 8%; font-size: 76px; animation-duration: 14s; animation-delay: -3s; }
+.ball-3 { bottom: 12%; left: 12%; font-size: 52px; animation-duration: 11s; animation-delay: -6s; }
+.ball-4 { top: 18%; right: 14%; font-size: 60px; animation-duration: 13s; animation-delay: -2s; }
+
+.floating-3d-goal {
+    position: absolute;
+    font-size: 90px;
+    opacity: 0.45;
+    filter: drop-shadow(0 15px 35px rgba(16,185,129,0.5)) drop-shadow(0 0 40px rgba(16,185,129,0.3));
+    animation: floatGoal3D 16s ease-in-out infinite alternate;
+    user-select: none;
+    transition: transform 0.1s ease-out;
+}
+.goal-left { top: 38%; left: 3%; }
+.goal-right { top: 28%; right: 3%; animation-delay: -6s; }
+
+.floating-3d-trophy {
+    position: absolute;
+    top: 8%; left: 42%;
+    font-size: 54px;
+    opacity: 0.5;
+    filter: drop-shadow(0 12px 30px rgba(245,158,11,0.6));
+    animation: floatTrophy3D 14s ease-in-out infinite alternate;
+    transition: transform 0.1s ease-out;
+}
+
 #particles-canvas { position:absolute; inset:0; z-index:-1; pointer-events:none; }
 
 .orb { position:absolute; border-radius:50%; filter:blur(80px); opacity:0.45; z-index:-1; pointer-events:none; }
