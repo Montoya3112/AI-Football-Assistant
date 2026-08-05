@@ -1,3 +1,14 @@
+# ════════════════════════════════════════════════════════════════
+# 📦 MÓDULO: main.py
+# 🎯 PROPÓSITO: Servidor Web Principal — API REST con FastAPI
+#    - Sirve el frontend estático (HTML/CSS/JS)
+#    - Expone endpoints de Chat IA, Visión OCR y Autenticación
+#    - Genera y descarga documentos Word (.docx) de cédulas
+# 🔗 DEPENDENCIAS: FastAPI, Supabase, ai_sports_engine, python-docx
+# 📁 UBICACIÓN: app/main.py
+# ════════════════════════════════════════════════════════════════
+
+# ── IMPORTACIONES ──────────────────────────────────────────────
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Header, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
@@ -14,12 +25,18 @@ from .core import supabase
 from .schemas import MensajeChat, RespuestaChat, RespuestaVision, RegistroUsuario, LoginUsuario, RespuestaAuth, CedulaArbitralExtraida
 from .ai_sports_engine import asistente_tecnico_chat, procesar_cedula_vision
 
+# ── INSTANCIA DE LA APLICACIÓN FASTAPI ─────────────────────────
+# FastAPI es el framework web que maneja todas las rutas HTTP.
+# Documentación automática disponible en /docs (Swagger UI).
 app = FastAPI(
     title="MRCA AI Football Assistant",
     version="1.0.0",
     description="Asistente de IA Futbolística & Visión - MRCA Solutions",
 )
 
+# ── MIDDLEWARE CORS ─────────────────────────────────────────────
+# Permite que el frontend (browser) se comunique con el backend
+# desde cualquier origen. Necesario para desarrollo local y producción.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,9 +45,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── ARCHIVOS ESTÁTICOS (Frontend HTML/CSS/JS) ──────────────────
+# Monta la carpeta /static para servir index.html, style.css y script.js
 static_path = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=static_path), name="static")
 
+# ── DEPENDENCIA: AUTENTICACIÓN DE USUARIO ──────────────────────
+# Verifica el token JWT del header Authorization usando Supabase Auth.
+# Si no hay token o es "guest-access", retorna usuario invitado.
 async def get_current_user(authorization: str = Header(None)):
     if not authorization:
         return {"email": "invitado@mrca.local", "nombre": "Invitado"}
@@ -45,10 +67,20 @@ async def get_current_user(authorization: str = Header(None)):
         pass
     return {"email": "invitado@mrca.local", "nombre": "Invitado"}
 
+# ════════════════════════════════════════════════════════════════
+# ENDPOINTS — RUTAS HTTP DE LA API
+# ════════════════════════════════════════════════════════════════
+
+# ── RUTA RAÍZ: Sirve la aplicación web ─────────────────────────
+# GET / → Retorna index.html (punto de entrada del frontend SPA)
 @app.get("/")
 async def root():
     return FileResponse(os.path.join(static_path, "index.html"))
 
+# ── ENDPOINT: Registro de nuevo usuario ────────────────────────
+# POST /api/v1/auth/register
+# Crea una cuenta en Supabase Auth con email + password + nombre.
+# Retorna token JWT para sesión inmediata (si no requiere confirmación).
 @app.post("/api/v1/auth/register", response_model=RespuestaAuth)
 async def register(payload: RegistroUsuario):
     try:
@@ -62,6 +94,10 @@ async def register(payload: RegistroUsuario):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+# ── ENDPOINT: Inicio de sesión ──────────────────────────────────
+# POST /api/v1/auth/login
+# Autentica email + password contra Supabase Auth.
+# Retorna JWT (access_token) que el frontend guarda en memoria.
 @app.post("/api/v1/auth/login", response_model=RespuestaAuth)
 async def login(payload: LoginUsuario):
     try:
@@ -73,6 +109,11 @@ async def login(payload: LoginUsuario):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+# ── ENDPOINT: Chat con IA Futbolística ─────────────────────────
+# POST /api/v1/futbol/chat
+# ENTRADA: { "mensaje": "Dame la alineación del Real Madrid" }
+# PROCESO: Llama a asistente_tecnico_chat() → Gemini API → respuesta
+# SALIDA : { "respuesta": "texto en Markdown con análisis táctico" }
 @app.post("/api/v1/futbol/chat", response_model=RespuestaChat)
 async def chat(payload: MensajeChat, current_user: dict = Depends(get_current_user)):
     try:
@@ -81,6 +122,12 @@ async def chat(payload: MensajeChat, current_user: dict = Depends(get_current_us
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ── ENDPOINT: Visión OCR — Cédula Arbitral ─────────────────────
+# POST /api/v1/futbol/vision/cedulas
+# ENTRADA: Imagen JPG/PNG de una cédula arbitral (multipart/form-data)
+# PROCESO: Gemini Vision analiza la imagen y extrae campos estructurados
+# SALIDA : JSON con equipos, goles, tarjetas, jugadores e incidencias
+# ALMACÉN: El registro se inserta en tabla "reportes_partidos" de Supabase
 @app.post("/api/v1/futbol/vision/cedulas", response_model=RespuestaVision)
 async def vision_cedulas(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -102,6 +149,13 @@ async def vision_cedulas(file: UploadFile = File(...), current_user: dict = Depe
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ── ENDPOINT: Exportar Cédula como Documento Word (.docx) ──────
+# POST /api/v1/futbol/vision/export-doc
+# ENTRADA: JSON con el schema CedulaArbitralExtraida (campos del partido)
+# PROCESO: python-docx construye un documento profesional con:
+#          portada, tabla de datos, plantillas de jugadores,
+#          tarjetas, incidencias y sección de firmas.
+# SALIDA : Archivo .docx descargable vía StreamingResponse
 @app.post("/api/v1/futbol/vision/export-doc")
 async def export_cedula_word(cedula: CedulaArbitralExtraida):
     try:
@@ -216,6 +270,9 @@ async def export_cedula_word(cedula: CedulaArbitralExtraida):
         sig_p = doc.add_paragraph()
         sig_p.add_run("_______________________             _______________________\nFirma del Árbitro Central              Firma Capitán Local\n\n_______________________\nFirma Capitán Visitante")
 
+        # ── GENERACIÓN Y DESCARGA DEL ARCHIVO ──────────────────
+        # Se serializa el documento a un buffer en memoria (BytesIO)
+        # y se envía como StreamingResponse con headers de descarga.
         file_stream = io.BytesIO()
         doc.save(file_stream)
         file_stream.seek(0)
@@ -229,6 +286,9 @@ async def export_cedula_word(cedula: CedulaArbitralExtraida):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ── ENDPOINT: Health Check ──────────────────────────────────────
+# GET /api/health — Verifica que el servidor está corriendo
+# Usado por plataformas de hosting (Render, Railway) para monitoreo.
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "service": "MRCA AI Football Assistant"}

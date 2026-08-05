@@ -1,9 +1,4 @@
--- =====================================================================
--- ESQUEMA DE BASE DE DATOS SUPABASE — AI FOOTBALL ASSISTANT
--- MRCA Solutions © 2026
--- =====================================================================
-
--- 1. Tabla de Reportes Arbitrales (Visión Artificial)
+-- 1. Tabla de Reportes Arbitrales--
 CREATE TABLE IF NOT EXISTS public.reportes_partidos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     equipo_local TEXT NOT NULL,

@@ -1,5 +1,36 @@
+// ════════════════════════════════════════════════════════════════
+// 📦 ARCHIVO: script.js
+// 🎯 PROPÓSITO: Lógica del Frontend — AI Football Assistant (SPA)
+//    Controla toda la interfaz de usuario: login, chat, visión,
+//    pizarra táctica 3D y simulación de red neuronal 4D.
+// 📡 COMUNICACIÓN: Fetch API → FastAPI backend (puerto 8000)
+// 📁 UBICACIÓN: app/static/script.js
+// 🗂️  SECCIONES:
+//    1.  Referencia de elementos DOM (getElementById)
+//    2.  Estado global de la aplicación (variables reactivas)
+//    3.  Inicialización (init, partículas, animaciones 3D)
+//    4.  Sistema de Partículas (canvas animado del login)
+//    5.  Sesión y Autenticación (login, registro, logout)
+//    6.  Navegación (switchView, menú móvil, nav items)
+//    7.  Selección de Liga (selector con chips de ligas)
+//    8.  Historial de Conversaciones (localStorage)
+//    9.  Chat IA — Envío y renderizado de mensajes
+//   10.  Pizarra Táctica 3D (pitch SVG, jugadores drag & drop)
+//   11.  Recálculo de Posición en Arrastre (recalculatePlayerPosition)
+//   12.  Formaciones y Plantillas (getFormationData, roster parser)
+//   13.  Visión OCR — Upload y procesamiento de cédulas
+//   14.  Exportación — PDF, Excel, TXT, Word
+//   15.  Red Neuronal 4D — Simulación con backpropagación animada
+//   16.  Presets de motivación y tarjetas de sugerencias
+//   17.  Event Listeners globales
+// ════════════════════════════════════════════════════════════════
+
 document.addEventListener('DOMContentLoaded', () => {
-    // ═══ DOM ELEMENTS ═══
+    // ════════════════════════════════════════
+    // 1. REFERENCIAS DOM — getElementById
+    //    Todos los elementos HTML controlados por JavaScript.
+    //    Se acceden usando el helper $('id') definido abajo.
+    // ════════════════════════════════════════
     const $ = id => document.getElementById(id);
     const loginScreen = $('login-screen'), mainApp = $('main-app'), loginCard = $('login-card');
     const loginBtn = $('login-btn'), guestBtn = $('guest-btn'), registerBtn = $('register-btn');
@@ -32,7 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const albText = $('alb-text');
     const changeLeagueBtn = $('change-league-btn');
 
-    // ═══ STATE ═══
+    // ════════════════════════════════════════
+    // 2. ESTADO GLOBAL — Variables reactivas
+    //    Guardan el estado actual de la app en memoria.
+    //    currentUser: usuario autenticado (objeto Supabase)
+    //    authToken: JWT para autorizar llamadas a la API
+    //    conversations: historial guardado en localStorage
+    //    selectedLeague: liga seleccionada en el selector
+    // ════════════════════════════════════════
     let currentUser = null;
     let authToken = null;
     let selectedImageFile = null;
@@ -42,7 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastUserPrompt = '';
     let selectedLeague = 'Todas las Ligas';
 
-    // ═══ INIT ═══
+    // ════════════════════════════════════════
+    // 3. INICIALIZACIÓN — Punto de entrada principal
+    //    init() se llama al final del archivo.
+    //    Lanza: partículas, tilt 3D, sesión y listeners.
+    // ════════════════════════════════════════
     function init() {
         initParticles();
         init3DTilt();

@@ -1,3 +1,13 @@
+# ════════════════════════════════════════════════════════════════
+# 📦 MÓDULO: ai_sports_engine.py
+# 🎯 PROPÓSITO: Motor de Inteligencia Artificial Futbolística
+#    - Procesa consultas tácticas via Gemini API
+#    - Realiza OCR/Visión sobre cédulas arbitrales manuscritas
+# 🔗 DEPENDENCIAS: google-genai, asyncio, core.py, schemas.py
+# 📁 UBICACIÓN: app/ai_sports_engine.py
+# ════════════════════════════════════════════════════════════════
+
+# ── IMPORTACIONES ──────────────────────────────────────────────
 import json
 import asyncio
 import os
@@ -5,7 +15,10 @@ from .core import client
 from .schemas import CedulaArbitralExtraida
 from google.genai import types
 
-# Lista de modelos válidos en producción con cuota habilitada (15 RPM / Free Tier)
+# ── LISTA DE MODELOS CANDIDATOS (Fallback Chain) ───────────────
+# Si el primer modelo supera su cuota o falla, el sistema
+# intenta automáticamente con el siguiente en la lista.
+# Cuota máxima: 15 RPM (Requests Per Minute) en Free Tier.
 MODELOS_CANDIDATOS = [
     "gemini-3.5-flash-lite",
     "gemini-3.1-flash-lite",
@@ -14,6 +27,10 @@ MODELOS_CANDIDATOS = [
     "gemini-2.0-flash-lite",
 ]
 
+# ── SYSTEM PROMPT — DIRECTOR TÉCNICO IA ────────────────────────
+# Instrucción de sistema que define el rol, personalidad y restricciones
+# del asistente. RESTRICCIÓN CRÍTICA: Solo responde sobre fútbol.
+# Si detecta pregunta fuera de dominio → emite "Tarjeta Amarilla".
 SYSTEM_PROMPT_COACH = """Eres un Director Técnico y Analista Táctico de fútbol de élite mundial con más de 30 años de experiencia.
 
 REGLA CRÍTICA DE RESTRICCIÓN DE DOMINIO (ESTRICTA):
@@ -33,6 +50,10 @@ REGLAS DE RESPUESTA:
 5. Si el usuario te pide una alineación o formación táctica de cualquier equipo o selección (ej: Real Madrid, Barcelona, Manchester City, PSG, Bayern, Argentina, México, etc.), menciona claramente la formación (ej: 4-3-3, 4-4-2, 3-5-2 o 4-2-3-1) y lista los 11 jugadores en una lista numerada del 1 al 11 (iniciando con el Portero), para que la Pizarra Táctica 3D renderice automáticamente la plantilla exacta requerida.
 """
 
+# ── SYSTEM PROMPT — VISIÓN ARTIFICIAL OCR ──────────────────────
+# Instrucción para el módulo de visión de Gemini.
+# Extrae información de cédulas arbitrales: equipos, goles,
+# tarjetas, jugadores e incidencias, incluso de imágenes manuscritas.
 SYSTEM_PROMPT_VISION = """Eres un sistema experto de visión artificial y OCR avanzado para fútbol.
 Tu trabajo es analizar cualquier imagen de una cédula arbitral, acta de partido o lista de jugadores, INCLUSO SI ESTÁ ESCRITA A MANO, POCO LEGIBLE, MANCHADA O DESESTRUCTURADA.
 
@@ -46,6 +67,11 @@ INSTRUCCIONES DE EXTRACCIÓN Y NORMALIZACIÓN:
 7. Devuelve la información estricta y únicamente en el esquema de respuesta especificado.
 """
 
+# ── FUNCIÓN: asistente_tecnico_chat ────────────────────────────
+# ENTRADA : pregunta (str) — consulta táctica del usuario
+# SALIDA  : respuesta (str) — análisis generado por Gemini AI
+# PROCESO : Itera sobre MODELOS_CANDIDATOS con pausa de 4s entre fallos
+#           para respetar el límite de cuota RPM del Free Tier.
 async def asistente_tecnico_chat(pregunta: str) -> str:
     ultimo_error = None
 
@@ -69,6 +95,12 @@ async def asistente_tecnico_chat(pregunta: str) -> str:
 
     raise RuntimeError(f"Todos los modelos candidatos agotaron su cuota o fallaron. Último error: {ultimo_error}")
 
+# ── FUNCIÓN: procesar_cedula_vision ────────────────────────────
+# ENTRADA : imagen_bytes (bytes) — imagen JPG/PNG de la cédula arbitral
+# SALIDA  : CedulaArbitralExtraida (schema Pydantic con todos los campos)
+# PROCESO : Envía la imagen + instrucción a Gemini Vision.
+#           Solicita respuesta en formato JSON estrictamente tipado.
+#           Parsea el JSON y retorna el schema validado.
 async def procesar_cedula_vision(imagen_bytes: bytes) -> CedulaArbitralExtraida:
     ultimo_error = None
 

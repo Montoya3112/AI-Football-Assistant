@@ -1,5 +1,25 @@
+/* ════════════════════════════════════════════════════════════════
+   📦 ARCHIVO: style.css
+   🎯 PROPÓSITO: Estilos globales de la aplicación AI Football Assistant
+   📁 UBICACIÓN: app/static/style.css
+   🗂️  SECCIONES:
+      1. Design Tokens & Variables CSS (:root)
+      2. Reset & Base
+      3. Layout — App Shell (sidebar, navbar, main)
+      4. Login Screen & Animaciones 3D
+      5. Chat — Mensajes, Input, Welcome
+      6. Historial de Conversaciones
+      7. Visión OCR — Drop Zone, Resultados
+      8. Pizarra Táctica 3D (Pitch, Jugadores, Drag)
+      9. Sección About — Red Neuronal 4D
+     10. Toasts & Notificaciones
+     11. Responsive (Media Queries)
+   ════════════════════════════════════════════════════════════════ */
+
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS & VIVID COLOR PALETTE
+   1. DESIGN TOKENS & VIVID COLOR PALETTE
+   Variables CSS globales: colores, fuentes, sombras, radios.
+   Modifica aquí para cambiar el tema completo de la app.
    ═══════════════════════════════════════════ */
 :root {
     --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -42,7 +62,9 @@
 }
 
 /* ═══════════════════════════════════════════
-   BASE & UTILITIES
+   2. BASE & UTILITIES
+   Reset de estilos, utilidades globales (.hidden, scrollbar)
+   y configuración de fuente e overflow del body.
    ═══════════════════════════════════════════ */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -63,7 +85,9 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,0.4); }
 
 /* ═══════════════════════════════════════════
-   BUTTONS
+   3. BOTONES — Estilos base y variantes
+   .btn-primary, .gradient-btn, .btn-3d-sm
+   Todos los botones del sistema heredan de aquí.
    ═══════════════════════════════════════════ */
 button { font-family: var(--font); cursor: pointer; border: none; outline: none; transition: var(--transition); }
 button:disabled { opacity: 0.4; cursor: not-allowed; }

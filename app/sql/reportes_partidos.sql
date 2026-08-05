@@ -1,7 +1,3 @@
--- Supabase (PostgreSQL) schema for AI Football Assistant
--- Table: reportes_partidos
--- Stores structured data extracted from referee match cards (cédulas)
-
 CREATE TABLE IF NOT EXISTS public.reportes_partidos (
     id BIGSERIAL PRIMARY KEY,
     equipo_local VARCHAR(100) NOT NULL,
