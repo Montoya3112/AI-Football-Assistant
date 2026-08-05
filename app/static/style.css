@@ -619,11 +619,11 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
-/* BADGES DE PAÍSES Y BANDERAS DESTACADAS */
+/* BADGES DE PAÍSES Y BANDERAS DESTACADAS (SVG DE ALTA DEFINICIÓN) */
 .country-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     padding: 3px 9px;
     border-radius: 12px;
     font-size: 11.5px;
@@ -632,6 +632,19 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
     border: 1px solid var(--border);
     transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
     box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+.flag-svg {
+    width: 20px;
+    height: 14px;
+    border-radius: 2px;
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.3);
+    flex-shrink: 0;
+}
+.flag-icon-emoji {
+    font-size: 13px;
+    margin-right: 2px;
 }
 .country-badge.all { background: rgba(139,92,246,0.25); border-color: rgba(139,92,246,0.5); color: #c084fc; }
 .country-badge.es { background: linear-gradient(135deg, rgba(239,68,68,0.35), rgba(245,158,11,0.35)); border-color: rgba(245,158,11,0.6); color: #fef08a; }
