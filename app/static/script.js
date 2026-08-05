@@ -531,7 +531,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (conv.messages.length > 0) {
             chatWelcome.classList.add('hidden');
             chatMessages.classList.remove('hidden');
-            conv.messages.forEach(m => appendMessageDOM(m.text, m.sender, false));
+            let currentPrompt = '';
+            conv.messages.forEach(m => {
+                if (m.sender === 'user') {
+                    currentPrompt = m.text;
+                    appendMessageDOM(m.text, m.sender, false);
+                } else {
+                    appendMessageDOM(m.text, m.sender, false, currentPrompt);
+                }
+            });
             scrollToBottom();
         }
     }
@@ -730,9 +738,25 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.style.height = Math.min(chatInput.scrollHeight, 140) + 'px';
     }
 
+    let lastUserPrompt = '';
+
+    function shouldShowTacticalPitch(userPrompt, text) {
+        if (!userPrompt || !text) return false;
+        const p = userPrompt.toLowerCase();
+        const keywords = [
+            'alineacion', 'alineación', 'formacion', 'formación', 'esquema',
+            'parado', 'pizarra', 'once inicial', '11 inicial', '4-3-3', '4-4-2',
+            '3-5-2', '4-2-3-1', '5-3-2', '3-4-3'
+        ];
+        const userAsked = keywords.some(k => p.includes(k));
+        return userAsked;
+    }
+
     async function sendMessage(text) {
         if (!text) return;
         if (!activeConvId) createNewChat();
+
+        lastUserPrompt = text;
 
         chatWelcome.classList.add('hidden');
         chatMessages.classList.remove('hidden');
@@ -763,7 +787,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const data = await resp.json();
             const reply = data.respuesta || 'Sin respuesta.';
-            appendMessageDOM(reply, 'bot');
+            appendMessageDOM(reply, 'bot', true, text);
             if (conv) { conv.messages.push({text: reply, sender: 'bot'}); saveConversations(); }
         } catch(err) {
             console.error(err);
@@ -778,14 +802,16 @@ document.addEventListener('DOMContentLoaded', () => {
         await sendMessage(chatInput.value.trim());
     }
 
-    function appendMessageDOM(text, sender, animate = true) {
+    function appendMessageDOM(text, sender, animate = true, promptContext = null) {
         const div = document.createElement('div');
         div.className = `message ${sender}-message`;
         if (!animate) div.style.animation = 'none';
         const avatar = sender === 'user' ? (currentUser ? currentUser.charAt(0).toUpperCase() : 'U') : '⚽';
         let formatted = sender === 'bot' ? formatMarkdown(text) : escapeHtml(text);
 
-        if (sender === 'bot') {
+        const promptToCheck = promptContext || lastUserPrompt;
+
+        if (sender === 'bot' && shouldShowTacticalPitch(promptToCheck, text)) {
             const pitchHTML = generateTacticalPitchHTML(text);
             if (pitchHTML) {
                 formatted += pitchHTML;
