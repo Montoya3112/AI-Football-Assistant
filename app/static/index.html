@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Football Assistant | MRCA Solutions</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <!-- ═══════ LOGIN SCREEN ═══════ -->
@@ -73,6 +75,19 @@
                 </div>
             </div>
             <div class="nav-right">
+                <!-- EXPORT BAR -->
+                <div class="export-tools-bar">
+                    <button id="export-pdf-btn" class="btn-export pdf-btn" title="Descargar como PDF">
+                        📄 <span>PDF</span>
+                    </button>
+                    <button id="export-excel-btn" class="btn-export excel-btn" title="Descargar como Excel / CSV">
+                        📊 <span>Excel</span>
+                    </button>
+                    <button id="export-txt-btn" class="btn-export txt-btn" title="Descargar como Texto">
+                        📝 <span>TXT</span>
+                    </button>
+                </div>
+
                 <div class="user-profile">
                     <div class="avatar"><span id="user-initial">I</span></div>
                     <span id="display-name">Invitado</span>
@@ -100,6 +115,10 @@
                     <button class="nav-item active" data-target="chat-view">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                         <span>Chat IA</span>
+                    </button>
+                    <button class="nav-item" data-target="motivation-view">
+                        <span class="nav-icon-emoji">🔥</span>
+                        <span>Motivación Diaria</span>
                     </button>
                     <button class="nav-item" data-target="vision-view">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -176,6 +195,48 @@
                     </div>
                 </section>
 
+                <!-- ═══ MOTIVATION VIEW (PANEL DEDICADO) ═══ -->
+                <section id="motivation-view" class="view-section hidden">
+                    <div class="motivation-container custom-scrollbar">
+                        <div class="view-header">
+                            <div class="header-icon animate-pulse">🔥</div>
+                            <h2>Panel de Motivación Deportivo Diarios</h2>
+                            <p>Mensajes y lecciones tácticas que cambian automáticamente cada día para inspirar a tu equipo.</p>
+                        </div>
+
+                        <!-- Card del Consejo del Día -->
+                        <div class="daily-quote-card">
+                            <div class="quote-date-badge" id="quote-date-label">📅 5 de Agosto, 2026</div>
+                            <div class="quote-mark">“</div>
+                            <h3 id="daily-quote-text" class="daily-quote-text">
+                                "El éxito no es un accidente. Es trabajo duro, perseverancia, aprendizaje, estudio, sacrificio y, sobre todo, amor por lo que estás haciendo."
+                            </h3>
+                            <p id="daily-quote-author" class="daily-quote-author">— Pelé</p>
+                        </div>
+
+                        <!-- Generador de Charlas Motivacionales con IA -->
+                        <div class="motivation-actions-card">
+                            <h3>⚡ Generador de Charlas Motivacionales con IA</h3>
+                            <p>Selecciona la situación de tu partido para recibir una charla personalizada del DT:</p>
+
+                            <div class="motivation-buttons-grid">
+                                <button class="btn-motivation-preset" data-topic="Charla motivacional para antes de entrar a jugar un partido decisivo o una final">
+                                    🏆 Charla Antes de una Final
+                                </button>
+                                <button class="btn-motivation-preset" data-topic="Charla motivacional de medio tiempo para remontar un marcador adverso">
+                                    🔄 Remontada de Medio Tiempo
+                                </button>
+                                <button class="btn-motivation-preset" data-topic="Consejo de disciplina mental y enfoque para mantener la ventaja en los últimos minutos">
+                                    🧠 Enfoque y Disciplina Mental
+                                </button>
+                                <button class="btn-motivation-preset" data-topic="Mensaje de resiliencia y unión de equipo tras una derrota dolorosa">
+                                    🛡️ Resiliencia tras Derrota
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- ═══ VISION VIEW ═══ -->
                 <section id="vision-view" class="view-section hidden">
                     <div class="vision-container custom-scrollbar">
@@ -241,13 +302,13 @@
                             </div>
                             <div class="feature-card-3d">
                                 <div class="fc-icon">📊</div>
-                                <h3>Analista de Datos</h3>
-                                <p>Estadísticas avanzadas: xG, posesión, pases completados, presión alta. Comparativas históricas de jugadores y equipos.</p>
+                                <h3>Analista de Datos & Exportación</h3>
+                                <p>Estadísticas avanzadas (xG, posesión) con exportación directa de informes a PDF, Excel (CSV) y formato TXT.</p>
                             </div>
                             <div class="feature-card-3d">
-                                <div class="fc-icon">🔗</div>
-                                <h3>Integración Supabase</h3>
-                                <p>Los datos extraídos se almacenan automáticamente en PostgreSQL via Supabase para consultas y reportes posteriores.</p>
+                                <div class="fc-icon">🔥</div>
+                                <h3>Motivación Diaria</h3>
+                                <p>Panel dinámico con frases inspiradoras de leyendas del fútbol y generador de charlas tácticas de motivación.</p>
                             </div>
                         </div>
                         <div class="tech-stack">
@@ -257,7 +318,7 @@
                                 <span class="tech-badge">Python 3.10+</span>
                                 <span class="tech-badge">Gemini 2.5 Flash</span>
                                 <span class="tech-badge">Supabase</span>
-                                <span class="tech-badge">Pydantic</span>
+                                <span class="tech-badge">jsPDF</span>
                             </div>
                         </div>
                         <div class="system-info">

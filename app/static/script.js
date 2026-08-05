@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewSections = document.querySelectorAll('.view-section');
     const mobileMenuBtn = $('mobile-menu-btn');
     const sidebar = $('sidebar');
+    const exportPdfBtn = $('export-pdf-btn');
+    const exportExcelBtn = $('export-excel-btn');
+    const exportTxtBtn = $('export-txt-btn');
 
     // ═══ STATE ═══
     let currentUser = null;
@@ -35,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         init3DTilt();
         checkSession();
         setupEventListeners();
+        initDailyQuote();
     }
 
     // ════════════════════════════════════════
@@ -56,11 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
+                this.size = Math.random() * 2.2 + 0.5;
                 this.speedX = (Math.random() - 0.5) * 0.4;
                 this.speedY = (Math.random() - 0.5) * 0.4;
-                this.opacity = Math.random() * 0.5 + 0.1;
-                this.hue = Math.random() > 0.5 ? 250 : 210;
+                this.opacity = Math.random() * 0.5 + 0.15;
+                this.hue = Math.random() > 0.5 ? 260 : 210;
             }
             update() {
                 this.x += this.speedX; this.y += this.speedY;
@@ -70,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${this.hue},70%,70%,${this.opacity})`;
+                ctx.fillStyle = `hsla(${this.hue},75%,70%,${this.opacity})`;
                 ctx.fill();
             }
         }
@@ -87,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     if (dist < 120) {
                         ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(124,106,239,${0.08*(1-dist/120)})`; ctx.lineWidth = 0.5; ctx.stroke();
+                        ctx.strokeStyle = `rgba(139,92,246,${0.09*(1-dist/120)})`; ctx.lineWidth = 0.5; ctx.stroke();
                     }
                 }
             }
@@ -119,6 +123,162 @@ document.addEventListener('DOMContentLoaded', () => {
         persp.addEventListener('mouseleave', () => {
             loginCard.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
         });
+    }
+
+    // ════════════════════════════════════════
+    // CONSEJOS DE MOTIVACIÓN DIARIOS (ROTATIVOS)
+    // ════════════════════════════════════════
+    const dailyQuotes = [
+        { text: "El éxito no es un accidente. Es trabajo duro, perseverancia, aprendizaje, estudio, sacrificio y, sobre todo, amor por lo que estás haciendo.", author: "— Pelé" },
+        { text: "Cuanto más difícil sea la victoria, mayor será la felicidad de ganar.", author: "— Pelé" },
+        { text: "Tienes que luchar para alcanzar tu sueño. Tienes que sacrificarte y trabajar duro para ello.", author: "— Lionel Messi" },
+        { text: "Tu amor me hace fuerte, tu odio me hace imparable.", author: "— Cristiano Ronaldo" },
+        { text: "Si no tienes confianza, siempre encontrarás una forma de no ganar.", author: "— Carl Lewis" },
+        { text: "Prefiero ser una buena persona antes que el mejor jugador del mundo.", author: "— Lionel Messi" },
+        { text: "Mis errores han sido mi mayor aprendizaje para alcanzar el éxito táctico.", author: "— Pep Guardiola" },
+        { text: "El talento gana partidos, pero el trabajo en equipo y la inteligencia ganan campeonatos.", author: "— Michael Jordan" },
+        { text: "Jugar al fútbol es muy sencillo, pero jugar al fútbol sencillo es lo más difícil que hay.", author: "— Johan Cruyff" },
+        { text: "No se trata de las ganas de ganar, todos las tienen. Se trata de las ganas de prepararse para ganar.", author: "— Sir Alex Ferguson" }
+    ];
+
+    function initDailyQuote() {
+        const today = new Date();
+        const start = new Date(today.getFullYear(), 0, 0);
+        const diff = today - start;
+        const oneDay = 1000 * 60 * 60 * 24;
+        const dayOfYear = Math.floor(diff / oneDay);
+        
+        const quoteObj = dailyQuotes[dayOfYear % dailyQuotes.length];
+        
+        const dateLabel = $('quote-date-label');
+        const quoteText = $('daily-quote-text');
+        const quoteAuthor = $('daily-quote-author');
+
+        if (dateLabel && quoteText && quoteAuthor) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateLabel.textContent = `📅 ${today.toLocaleDateString('es-ES', options)}`;
+            quoteText.textContent = `"${quoteObj.text}"`;
+            quoteAuthor.textContent = quoteObj.author;
+        }
+    }
+
+    // ════════════════════════════════════════
+    // HERRAMIENTAS DE EXPORTACIÓN (PDF, EXCEL/CSV, TXT)
+    // ════════════════════════════════════════
+    function exportToPDF() {
+        const conv = conversations.find(c => c.id === activeConvId);
+        if (!conv || conv.messages.length === 0) {
+            showNotification('No hay mensajes en la conversación activa para exportar.', 'error');
+            return;
+        }
+
+        try {
+            if (window.jspdf && window.jspdf.jsPDF) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(16);
+                doc.text("AI Football Assistant - Reporte Táctico", 14, 20);
+                
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Usuario: ${currentUser || 'Invitado'} | Fecha: ${new Date().toLocaleDateString()}`, 14, 28);
+                doc.line(14, 32, 196, 32);
+
+                let y = 40;
+                conv.messages.forEach(m => {
+                    const prefix = m.sender === 'user' ? `[${currentUser}]: ` : '[AI DT]: ';
+                    const cleanText = m.text.replace(/[\*\#\`]/g, '');
+                    const lines = doc.splitTextToSize(prefix + cleanText, 175);
+                    
+                    if (y + (lines.length * 6) > 280) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    
+                    doc.setFont("helvetica", m.sender === 'user' ? "bold" : "normal");
+                    doc.text(lines, 14, y);
+                    y += (lines.length * 6) + 4;
+                });
+
+                doc.save(`Reporte_Futbol_${Date.now()}.pdf`);
+                showNotification('PDF descargado correctamente 📄', 'success');
+            } else {
+                // Fallback a ventana de impresión
+                const printWindow = window.open('', '_blank');
+                let html = `<html><head><title>Reporte Táctico</title><style>body{font-family:sans-serif;padding:20px;}h2{color:#7c6aef;}.msg{margin-bottom:12px;padding:10px;border-radius:6px;background:#f3f4f6;}.user{font-weight:bold;color:#1e40af;}</style></head><body>`;
+                html += `<h2>AI Football Assistant - Reporte Deportivo</h2><hr/>`;
+                conv.messages.forEach(m => {
+                    html += `<div class="msg"><span class="user">${m.sender === 'user' ? currentUser : 'AI DT'}:</span> ${escapeHtml(m.text)}</div>`;
+                });
+                html += `</body></html>`;
+                printWindow.document.write(html);
+                printWindow.document.close();
+                printWindow.print();
+                showNotification('Generando documento de impresión 📄', 'info');
+            }
+        } catch (err) {
+            console.error(err);
+            showNotification('Error al generar PDF', 'error');
+        }
+    }
+
+    function exportToExcel() {
+        const conv = conversations.find(c => c.id === activeConvId);
+        if (!conv || conv.messages.length === 0) {
+            showNotification('No hay datos en el chat activo para exportar a Excel.', 'error');
+            return;
+        }
+
+        let csvContent = "\uFEFF"; // UTF-8 BOM
+        csvContent += "ID_Conversacion,Remitente,Mensaje,Fecha\n";
+
+        conv.messages.forEach((m, idx) => {
+            const sender = m.sender === 'user' ? currentUser : 'AI DT';
+            const cleanText = m.text.replace(/"/g, '""').replace(/\n/g, ' ');
+            const dateStr = new Date(conv.created).toLocaleString();
+            csvContent += `"${conv.id}_${idx + 1}","${sender}","${cleanText}","${dateStr}"\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Reporte_Futbol_Excel_${Date.now()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showNotification('Archivo Excel (.csv) descargado correctamente 📊', 'success');
+    }
+
+    function exportToTXT() {
+        const conv = conversations.find(c => c.id === activeConvId);
+        if (!conv || conv.messages.length === 0) {
+            showNotification('No hay mensajes activos para exportar a TXT.', 'error');
+            return;
+        }
+
+        let txt = `====================================================\n`;
+        txt += `AI FOOTBALL ASSISTANT - REPORTE DE CONVERSACIÓN\n`;
+        txt += `Usuario: ${currentUser || 'Invitado'}\n`;
+        txt += `Fecha: ${new Date().toLocaleString()}\n`;
+        txt += `====================================================\n\n`;
+
+        conv.messages.forEach(m => {
+            const sender = m.sender === 'user' ? currentUser.toUpperCase() : 'ASISTENTE TÁCTICO IA';
+            txt += `[${sender}]:\n${m.text}\n\n----------------------------------------------------\n\n`;
+        });
+
+        const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Transcripcion_Futbol_${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showNotification('Archivo TXT descargado correctamente 📝', 'success');
     }
 
     // ════════════════════════════════════════
@@ -516,7 +676,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const avatar = sender === 'user' ? (currentUser ? currentUser.charAt(0).toUpperCase() : 'U') : '⚽';
         let formatted = sender === 'bot' ? formatMarkdown(text) : escapeHtml(text);
 
-        // Si la respuesta del bot habla de una formación táctica, renderizar la Cancha 3D
         if (sender === 'bot') {
             const pitchHTML = generateTacticalPitchHTML(text);
             if (pitchHTML) {
@@ -619,6 +778,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
             .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/\[(.*?)\]\((https?:\/\/.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1 🔗</a>')
             .replace(/^\s*[-•]\s(.*)$/gim, '<li>$1</li>')
             .replace(/\n\n/g, '</p><p>')
             .replace(/\n/g, '<br>');
@@ -656,9 +816,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         newChatBtn.addEventListener('click', createNewChat);
 
+        // Export Buttons
+        if (exportPdfBtn) exportPdfBtn.addEventListener('click', exportToPDF);
+        if (exportExcelBtn) exportExcelBtn.addEventListener('click', exportToExcel);
+        if (exportTxtBtn) exportTxtBtn.addEventListener('click', exportToTXT);
+
+        // Presets de Motivación
+        document.querySelectorAll('.btn-motivation-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const topic = btn.dataset.topic;
+                if (topic) {
+                    switchView('chat-view');
+                    sendMessage(topic);
+                }
+            });
+        });
+
         document.addEventListener('click', (e) => {
             const card = e.target.closest('.suggestion-card');
             if (card && card.dataset.prompt) {
+                switchView('chat-view');
                 sendMessage(card.dataset.prompt);
             }
         });
