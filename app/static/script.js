@@ -1448,6 +1448,54 @@ document.addEventListener('DOMContentLoaded', () => {
                     await new Promise(r => setTimeout(r, 300));
                 }
 
+                // ── BACKPROPAGATION PHASE ──
+                if (statusEl) { statusEl.textContent = '🔁 Retropropagando gradientes...'; statusEl.className = 'm-val'; }
+                if (epochLog) {
+                    const bpHeader = document.createElement('div');
+                    bpHeader.className = 'epoch-line';
+                    bpHeader.innerHTML = `<span class="ep-num" style="color:#f87171;">↩ Backpropagation</span> — Ajustando pesos con gradiente descendente (SGD + Adam)`;
+                    epochLog.appendChild(bpHeader);
+                    epochLog.scrollTop = epochLog.scrollHeight;
+                }
+                await new Promise(r => setTimeout(r, 200));
+
+                // Backward: output → h2
+                const bpOut = [];
+                outputNodes.forEach((out, i) => {
+                    h2Nodes.forEach((h2, j) => {
+                        bpOut.push(animateSignalPulse(out, h2, '#f87171', j * 60));
+                    });
+                });
+                await Promise.all(bpOut);
+
+                // Backward: h2 → h1
+                const bpH = [];
+                h2Nodes.forEach((h2, i) => {
+                    h1Nodes.forEach((h1, j) => {
+                        bpH.push(animateSignalPulse(h2, h1, '#fb923c', j * 55));
+                    });
+                });
+                await Promise.all(bpH);
+
+                // Backward: h1 → input
+                const bpIn = [];
+                h1Nodes.forEach((h1, i) => {
+                    inputNodes.forEach((inp, j) => {
+                        if ((i + j) % 2 === 0)
+                            bpIn.push(animateSignalPulse(h1, inp, '#fbbf24', j * 65));
+                    });
+                });
+                await Promise.all(bpIn);
+
+                if (epochLog) {
+                    const bpDone = document.createElement('div');
+                    bpDone.className = 'epoch-line';
+                    bpDone.innerHTML = `<span class="ep-num" style="color:#fb923c;">↩ BP Completo</span> — Gradientes aplicados · LR: 0.001 · Momentum: 0.9`;
+                    epochLog.appendChild(bpDone);
+                    epochLog.scrollTop = epochLog.scrollHeight;
+                }
+                await new Promise(r => setTimeout(r, 300));
+
                 // Final state
                 [...inputNodes, ...h1Nodes, ...h2Nodes, ...outputNodes].forEach(n => {
                     n.style.animation = 'nodePulse 3s infinite ease-in-out';

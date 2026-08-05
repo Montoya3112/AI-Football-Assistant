@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Football Assistant | MRCA Solutions</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=1.1.4">
+    <link rel="stylesheet" href="/static/style.css?v=1.1.5">
     <!-- jsPDF for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -363,6 +363,17 @@
                                     ⚡ Simular Aprendizaje 4D
                                 </button>
                             </div>
+                            <!-- Descripción general del sistema -->
+                            <div class="nn-arch-desc">
+                                <span class="nad-chip nad-api">🔗 API Gemini</span>
+                                <span class="nad-sep">→</span>
+                                <span class="nad-chip nad-input">📥 Entrada de Datos</span>
+                                <span class="nad-sep">→</span>
+                                <span class="nad-chip nad-hidden">🔬 Procesamiento Neuronal</span>
+                                <span class="nad-sep">→</span>
+                                <span class="nad-chip nad-output">📤 Inferencia Táctica</span>
+                                <p class="nad-note">El sistema recibe consultas del usuario, las vectoriza mediante embeddings, aplica mecanismos de atención táctica y genera respuestas especializadas en fútbol a través de la API de Gemini AI.</p>
+                            </div>
 
                             <div class="nn-canvas-container" id="nn-canvas-container">
                                 <!-- SVG connections overlay -->
@@ -374,32 +385,39 @@
                                         <span class="node-icon">💬</span>
                                         <span class="node-text">Pregunta Táctica</span>
                                     </div>
+                                    <p class="nn-desc-txt">Texto libre del usuario: alineaciones, jugadores, tácticas</p>
                                     <div class="nn-node node-input" data-label="Visión OCR">
                                         <span class="node-icon">📷</span>
                                         <span class="node-text">Cédula / Manuscrito</span>
                                     </div>
+                                    <p class="nn-desc-txt">Imagen de cédula arbitral procesada vía OCR con Gemini Vision</p>
                                     <div class="nn-node node-input" data-label="Datos de Partido">
                                         <span class="node-icon">📊</span>
                                         <span class="node-text">Estadísticas & xG</span>
                                     </div>
+                                    <p class="nn-desc-txt">Métricas avanzadas: goles esperados (xG), posesión, pases, presión alta</p>
                                 </div>
 
                                 <!-- Hidden Layer 1 Column -->
                                 <div class="nn-layer nn-hidden-layer-1">
                                     <div class="layer-title">CAPA OCULTA 1 (Embeddings)</div>
+                                    <p class="nn-desc-txt nn-desc-center">Convierte el texto en vectores numéricos de alta dimensión. Cada neurona aprende patrones semánticos del lenguaje futbolístico.</p>
                                     <div class="nn-node node-hidden pulse-node"><span>H1.1</span></div>
                                     <div class="nn-node node-hidden pulse-node"><span>H1.2</span></div>
                                     <div class="nn-node node-hidden pulse-node"><span>H1.3</span></div>
                                     <div class="nn-node node-hidden pulse-node"><span>H1.4</span></div>
+                                    <p class="nn-desc-txt nn-desc-center">4 neuronas · Activación ReLU · 512 dimensiones por embedding</p>
                                 </div>
 
                                 <!-- Hidden Layer 2 Column -->
                                 <div class="nn-layer nn-hidden-layer-2">
                                     <div class="layer-title">CAPA OCULTA 2 (Atención Táctica)</div>
+                                    <p class="nn-desc-txt nn-desc-center">Mecanismo de Self-Attention: pondera qué partes del contexto son más relevantes para la inferencia táctica.</p>
                                     <div class="nn-node node-hidden pulse-node"><span>H2.1</span></div>
                                     <div class="nn-node node-hidden pulse-node"><span>H2.2</span></div>
                                     <div class="nn-node node-hidden pulse-node"><span>H2.3</span></div>
                                     <div class="nn-node node-hidden pulse-node"><span>H2.4</span></div>
+                                    <p class="nn-desc-txt nn-desc-center">4 cabezas de atención · Softmax · Dropout 0.1</p>
                                 </div>
 
                                 <!-- Output Layer Column -->
@@ -409,15 +427,24 @@
                                         <span class="node-icon">⚽</span>
                                         <span class="node-text">Cancha 3D Jugadores</span>
                                     </div>
+                                    <p class="nn-desc-txt">Pizarra táctica interactiva con 11 jugadores arrastrables y posiciones recalculadas en tiempo real</p>
                                     <div class="nn-node node-output" data-label="Informe Word/PDF">
                                         <span class="node-icon">📝</span>
                                         <span class="node-text">Documento Word/PDF</span>
                                     </div>
+                                    <p class="nn-desc-txt">Exportación automática de reportes arbitrales y análisis tácticos en formato profesional</p>
                                     <div class="nn-node node-output" data-label="Estrategia DT">
                                         <span class="node-icon">🧠</span>
                                         <span class="node-text">Análisis de Estrategia</span>
                                     </div>
+                                    <p class="nn-desc-txt">Respuesta generada por Gemini AI con análisis táctico especializado en fútbol de élite</p>
                                 </div>
+                            </div>
+                            <!-- Leyenda de flujo -->
+                            <div class="nn-flow-legend">
+                                <span class="nfl-item nfl-fwd">⚡ Propagación directa (Forward Pass)</span>
+                                <span class="nfl-item nfl-bwd">🔁 Retropropagación (Backpropagation)</span>
+                                <span class="nfl-item nfl-api">🔗 Conexión API Gemini 2.5 Flash</span>
                             </div>
                             
                             <div class="nn-metrics-bar">
@@ -476,6 +503,6 @@
 
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
-    <script src="/static/script.js?v=1.1.4"></script>
+    <script src="/static/script.js?v=1.1.5"></script>
 </body>
 </html>

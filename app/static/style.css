@@ -991,6 +991,44 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .ep-acc { color:#34d399; }
 @keyframes fadeInLine { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:none; } }
 
+/* ── Architecture Description Bar ── */
+.nn-arch-desc {
+    display:flex; align-items:center; flex-wrap:wrap; gap:8px;
+    margin-bottom:18px; padding:12px 16px;
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+    border-radius:var(--radius-md);
+}
+.nad-chip {
+    font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px;
+    letter-spacing:0.5px; white-space:nowrap;
+}
+.nad-api    { background:rgba(124,58,237,0.2); color:#c4b5fd; border:1px solid rgba(124,58,237,0.35); }
+.nad-input  { background:rgba(59,130,246,0.2); color:#93c5fd; border:1px solid rgba(59,130,246,0.35); }
+.nad-hidden { background:rgba(14,165,233,0.2); color:#7dd3fc; border:1px solid rgba(14,165,233,0.35); }
+.nad-output { background:rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.35); }
+.nad-sep    { color:var(--text-muted); font-size:14px; font-weight:300; }
+.nad-note   { width:100%; margin:6px 0 0; font-size:11px; color:var(--text-muted); line-height:1.5; }
+
+/* ── Node description texts ── */
+.nn-desc-txt {
+    font-size:10px; color:var(--text-muted); text-align:left;
+    line-height:1.4; margin:2px 0 6px; padding:0 4px;
+    border-left:2px solid rgba(124,58,237,0.3);
+}
+.nn-desc-center { text-align:center; border-left:none; border-top:1px dashed rgba(255,255,255,0.07); padding-top:5px; }
+
+/* ── Flow Legend ── */
+.nn-flow-legend {
+    display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; padding:10px 16px;
+    background:rgba(0,0,0,0.25); border-radius:var(--radius-md);
+    border:1px solid rgba(255,255,255,0.06);
+}
+.nfl-item { font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; }
+.nfl-fwd  { color:#fcd34d; background:rgba(252,211,77,0.1); border:1px solid rgba(252,211,77,0.25); }
+.nfl-bwd  { color:#f87171; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.25); }
+.nfl-api  { color:#c4b5fd; background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.25); }
+
+
 .tech-stack { text-align:center;margin-bottom:36px; }
 .tech-label { font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);font-weight:600;margin-bottom:14px; }
 .tech-badges { display:flex;flex-wrap:wrap;justify-content:center;gap:8px; }
