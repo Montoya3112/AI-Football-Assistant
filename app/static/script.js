@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeConvId = null;
     let lastExtractedCedula = null;
     let lastUserPrompt = '';
+    let selectedLeague = 'Todas las Ligas';
 
     // ═══ INIT ═══
     function init() {
@@ -902,13 +903,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const typingId = showTypingIndicator();
 
         try {
+            const payloadText = (selectedLeague && selectedLeague !== 'Todas las Ligas') 
+                ? `[Contexto de Liga Preferida Seleccionada: ${selectedLeague}]\n${text}` 
+                : text;
+
             const resp = await fetch('/api/v1/futbol/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + (authToken || 'guest-access')
                 },
-                body: JSON.stringify({ mensaje: text })
+                body: JSON.stringify({ mensaje: payloadText })
             });
 
             removeTypingIndicator(typingId);
@@ -1100,6 +1105,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
 
         newChatBtn.addEventListener('click', createNewChat);
+
+        // Selector de Ligas Top 5
+        document.querySelectorAll('.league-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.league-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                selectedLeague = chip.dataset.league;
+                showNotification(`Liga activada: ${selectedLeague} ⚽`, 'info');
+            });
+        });
 
         // Chat Export Buttons
         if (exportPdfBtn) exportPdfBtn.addEventListener('click', exportToPDF);

@@ -574,6 +574,63 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
     box-shadow: 0 2px 6px rgba(0,0,0,0.5);
 }
 
+/* ═══════════════════════════════════════════
+   SELECTOR DE LIGAS (TOP 5 LIGAS DEL MUNDO)
+   ═══════════════════════════════════════════ */
+.league-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+    width: 100%;
+}
+.league-selector-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent-hover);
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.league-chips-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 2px;
+    width: 100%;
+}
+.league-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    transition: var(--transition);
+    cursor: pointer;
+}
+.league-chip:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+    background: var(--surface-hover);
+    transform: translateY(-1px);
+}
+.league-chip.active {
+    background: var(--accent-dim);
+    border-color: var(--accent-hover);
+    color: #fff;
+    box-shadow: 0 0 14px var(--accent-glow);
+}
+
 /* Input Bar (SIEMPRE FIJO ABAJO) */
 .chat-input-bar {
     flex-shrink: 0;

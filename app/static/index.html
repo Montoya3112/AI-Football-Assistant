@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Football Assistant | MRCA Solutions</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=1.0.5">
+    <link rel="stylesheet" href="/static/style.css?v=1.0.6">
     <!-- jsPDF for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -195,6 +195,34 @@
                         <!-- Input Bar -->
                         <div class="chat-input-bar">
                             <form id="chat-form" class="chat-input-form">
+                                <!-- SELECTOR DE LIGAS TOP 5 -->
+                                <div class="league-selector-wrapper">
+                                    <span class="league-selector-label">🌐 Liga:</span>
+                                    <div class="league-chips-container custom-scrollbar">
+                                        <button type="button" class="league-chip active" data-league="Todas las Ligas">
+                                            <span>⚽ Todas</span>
+                                        </button>
+                                        <button type="button" class="league-chip" data-league="LaLiga EA Sports (España)">
+                                            <span>🇪🇸 LaLiga</span>
+                                        </button>
+                                        <button type="button" class="league-chip" data-league="Premier League (Inglaterra)">
+                                            <span>🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</span>
+                                        </button>
+                                        <button type="button" class="league-chip" data-league="Serie A (Italia)">
+                                            <span>🇮🇹 Serie A</span>
+                                        </button>
+                                        <button type="button" class="league-chip" data-league="Bundesliga (Alemania)">
+                                            <span>🇩🇪 Bundesliga</span>
+                                        </button>
+                                        <button type="button" class="league-chip" data-league="UEFA Champions League">
+                                            <span>🏆 Champions League</span>
+                                        </button>
+                                        <button type="button" class="league-chip" data-league="Liga MX (México)">
+                                            <span>🇲🇽 Liga MX</span>
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <div class="input-box">
                                     <textarea id="chat-input" placeholder="Escribe tu pregunta sobre fútbol..." rows="1" class="custom-scrollbar"></textarea>
                                     <button type="submit" id="send-msg-btn" class="send-btn" disabled aria-label="Enviar">
@@ -428,6 +456,6 @@
 
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
-    <script src="/static/script.js?v=1.0.5"></script>
+    <script src="/static/script.js?v=1.0.6"></script>
 </body>
 </html>
