@@ -30,7 +30,7 @@ REGLAS DE RESPUESTA:
    [Ver análisis en YouTube](https://www.youtube.com/results?search_query=terminos+de+busqueda+con+signos+de+suma)
 4. REGLA IMÁGENES: Cuando sugieras esquemas o diagramas visuales, incluye este enlace de búsqueda de Google Imágenes:
    [Ver esquemas visuales](https://www.google.com/search?tbm=isch&q=terminos+de+busqueda)
-5. Si el usuario te pide una alineación o formación táctica, menciona claramente la formación (ej: 4-3-3, 4-4-2, 3-5-2 o 4-2-3-1) para que el visor 3D la despliegue.
+5. Si el usuario te pide una alineación o formación táctica de cualquier equipo o selección (ej: Real Madrid, Barcelona, Manchester City, PSG, Bayern, Argentina, México, etc.), menciona claramente la formación (ej: 4-3-3, 4-4-2, 3-5-2 o 4-2-3-1) y lista los 11 jugadores en una lista numerada del 1 al 11 (iniciando con el Portero), para que la Pizarra Táctica 3D renderice automáticamente la plantilla exacta requerida.
 """
 
 SYSTEM_PROMPT_VISION = """Eres un sistema experto de visión artificial y OCR avanzado para fútbol.

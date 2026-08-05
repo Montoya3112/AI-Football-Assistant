@@ -456,9 +456,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ════════════════════════════════════════
-    // CANCHA TÁCTICA 3D CON NOMBRES REALES Y AJUSTABLE (DRAG & DROP)
+    // CANCHA TÁCTICA 3D CON NOMBRES REALES Y AJUSTABLE (DRAG & DROP CON CAMBIO DE ROLES)
     // ════════════════════════════════════════
+    function recalculatePlayerPosition(x, y) {
+        let pos = 'MC';
+        let type = 'mf';
+
+        if (y >= 80) {
+            pos = 'POR';
+            type = 'gk';
+        } else if (y >= 62) {
+            type = 'df';
+            if (x < 28) pos = 'LI';
+            else if (x > 72) pos = 'LD';
+            else pos = 'DFC';
+        } else if (y >= 38) {
+            type = 'mf';
+            if (y >= 54) {
+                if (x >= 35 && x <= 65) pos = 'MCD';
+                else if (x < 35) pos = 'MI';
+                else pos = 'MD';
+            } else if (y <= 45 && x >= 35 && x <= 65) {
+                pos = 'MCO';
+            } else {
+                if (x < 30) pos = 'MI';
+                else if (x > 70) pos = 'MD';
+                else pos = 'MC';
+            }
+        } else {
+            type = 'fw';
+            if (x < 32) pos = 'EI';
+            else if (x > 68) pos = 'ED';
+            else pos = 'DC';
+        }
+
+        return { pos, type };
+    }
+
     function getFormationData(text) {
+        const teamPresets = {
+            'real madrid': ['Courtois', 'Mendy', 'Rüdiger', 'Militão', 'Carvajal', 'Tchouaméni', 'Valverde', 'Bellingham', 'Vinícius Jr.', 'Mbappé', 'Rodrygo'],
+            'madrid': ['Courtois', 'Mendy', 'Rüdiger', 'Militão', 'Carvajal', 'Tchouaméni', 'Valverde', 'Bellingham', 'Vinícius Jr.', 'Mbappé', 'Rodrygo'],
+            'barcelona': ['Ter Stegen', 'Balde', 'Araújo', 'Cubarsí', 'Koundé', 'Raphinha', 'Pedri', 'De Jong', 'Yamal', 'Lewandowski', 'Olmo'],
+            'barça': ['Ter Stegen', 'Balde', 'Araújo', 'Cubarsí', 'Koundé', 'Raphinha', 'Pedri', 'De Jong', 'Yamal', 'Lewandowski', 'Olmo'],
+            'manchester city': ['Ederson', 'Gvardiol', 'Ruben Dias', 'Akanji', 'Walker', 'Rodri', 'De Bruyne', 'Bernardo Silva', 'Foden', 'Haaland', 'Doku'],
+            'city': ['Ederson', 'Gvardiol', 'Ruben Dias', 'Akanji', 'Walker', 'Rodri', 'De Bruyne', 'Bernardo Silva', 'Foden', 'Haaland', 'Doku'],
+            'bayern': ['Neuer', 'Davies', 'Kim', 'Upamecano', 'Kimmich', 'Goretzka', 'Pavlovic', 'Musiala', 'Müller', 'Sané', 'Kane'],
+            'psg': ['Donnarumma', 'Nuno Mendes', 'Marquinhos', 'Beraldo', 'Hakimi', 'Vitinha', 'Zaïre-Emery', 'Fabian Ruiz', 'Barcola', 'Dembele', 'Kolo Muani'],
+            'inter': ['Sommer', 'Bastoni', 'Acerbi', 'Pavard', 'Dimarco', 'Barella', 'Calhanoglu', 'Mkhitaryan', 'Dumfries', 'Lautaro', 'Thuram'],
+            'argentina': ['Dibu Martínez', 'Tagliafico', 'Otamendi', 'Cuti Romero', 'Molina', 'De Paul', 'Enzo Fernández', 'Mac Allister', 'Di María', 'Messi', 'Julián Álvarez'],
+            'mexico': ['Malagón', 'Gallardo', 'Johan Vásquez', 'César Montes', 'Jorge Sánchez', 'Edson Álvarez', 'Chávez', 'Romo', 'Quiñones', 'Santi Giménez', 'Chucky Lozano'],
+            'méxico': ['Malagón', 'Gallardo', 'Johan Vásquez', 'César Montes', 'Jorge Sánchez', 'Edson Álvarez', 'Chávez', 'Romo', 'Quiñones', 'Santi Giménez', 'Chucky Lozano'],
+            'liverpool': ['Alisson', 'Robertson', 'Van Dijk', 'Konaté', 'Alexander-Arnold', 'Mac Allister', 'Gravenberch', 'Szoboszlai', 'Diaz', 'Núñez', 'Salah'],
+            'arsenal': ['Raya', 'Calafiori', 'Gabriel', 'Saliba', 'White', 'Rice', 'Partey', 'Odegaard', 'Martinelli', 'Havertz', 'Saka'],
+            'atletico': ['Oblak', 'Reinildo', 'Giménez', 'Le Normand', 'Llorente', 'Koke', 'De Paul', 'Gallagher', 'Griezmann', 'Julián Álvarez', 'Sorloth']
+        };
+
         const defaultNames = {
             '4-3-3': ['Courtois', 'Mendy', 'Rüdiger', 'Militão', 'Carvajal', 'Tchouaméni', 'Valverde', 'Bellingham', 'Vinícius Jr.', 'Mbappé', 'Rodrygo'],
             '4-4-2': ['Ter Stegen', 'Balde', 'Araújo', 'Cubarsí', 'Koundé', 'Raphinha', 'Pedri', 'De Jong', 'Yamal', 'Lewandowski', 'Olmo'],
@@ -521,25 +574,58 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
         };
 
-        const key = Object.keys(formations).find(f => text.includes(f));
-        if (!key) return null;
+        const key = Object.keys(formations).find(f => text.includes(f)) || '4-3-3';
+        const lowerText = text.toLowerCase();
 
-        const basePlayers = formations[key];
-        const names = defaultNames[key] || [];
+        // 1. Extraer nombres del texto de la respuesta (lista 1 a 11)
+        let extractedNames = [];
+        const lines = text.split('\n');
+        for (let l of lines) {
+            const clean = l.replace(/[\*\#\`]/g, '').trim();
+            const m = clean.match(/^(?:\d+[\.\)]|[-•])\s*([A-Za-zÁÉÍÓÚáéíóúñÑ\s\.\'\-]+?)(?:\s*[\(\–\-–].*)?$/);
+            if (m && m[1]) {
+                const nameCandidate = m[1].replace(/(?:POR|GK|DF|MC|DC|EI|ED|LI|LD|MCD|CAM|MCO|MF|FW|CD|CB|LB|RB|CM|ST|RW|LW)/gi, '').trim();
+                if (nameCandidate.length > 2 && nameCandidate.length < 24) {
+                    extractedNames.push(nameCandidate);
+                }
+            }
+        }
+
+        // 2. Determinar nombres finales
+        let names = [];
+        if (extractedNames.length >= 7) {
+            names = extractedNames;
+        } else {
+            const teamKey = Object.keys(teamPresets).find(t => lowerText.includes(t));
+            if (teamKey) {
+                names = teamPresets[teamKey];
+            } else {
+                names = defaultNames[key] || defaultNames['4-3-3'];
+            }
+        }
+
+        const basePlayers = formations[key] || formations['4-3-3'];
 
         const playersWithNames = basePlayers.map((p, idx) => ({
             ...p,
             name: names[idx] || `${p.pos} ${idx + 1}`
         }));
 
-        return { key, players: playersWithNames };
+        // Detectar nombre del equipo
+        let teamTitle = "Alineación Propuesta";
+        const teamKey = Object.keys(teamPresets).find(t => lowerText.includes(t));
+        if (teamKey) {
+            teamTitle = `Alineación: ${teamKey.toUpperCase()}`;
+        }
+
+        return { key, players: playersWithNames, teamTitle };
     }
 
     function generateTacticalPitchHTML(text) {
         const formationData = getFormationData(text);
         if (!formationData) return '';
 
-        const { key, players } = formationData;
+        const { key, players, teamTitle } = formationData;
 
         const playersHTML = players.map((p, idx) => `
             <div class="player-pin" style="top:${p.y}%; left:${p.x}%;" title="${p.name} (${p.pos})">
@@ -553,9 +639,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="pitch-card">
                     <div class="pitch-header">
                         <div class="pitch-title">
-                            ⚽ Pizarra Táctica 3D Interactiva & Ajustable
+                            ⚽ ${teamTitle} (${key})
                         </div>
-                        <span class="pitch-badge-tag">Formación ${key}</span>
+                        <span class="pitch-badge-tag">Pizarra 3D Dinámica</span>
                     </div>
                     <div class="soccer-field">
                         <div class="field-line-center"></div>
@@ -564,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="field-area-bottom"></div>
                         ${playersHTML}
                     </div>
-                    <p class="pitch-instruction">🖐️ Puedes arrastrar y mover las fichas de los jugadores en la cancha para ajustar tu táctica.</p>
+                    <p class="pitch-instruction">🖐️ Mueve las fichas en la cancha: el rol de cada jugador (POR, DFC, MC, DC) cambiará automáticamente según la zona.</p>
                 </div>
             </div>
         `;
@@ -605,9 +691,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 activePin.style.left = `${x}%`;
                 activePin.style.top = `${y}%`;
+
+                // Recalcular posición y rol dinámicamente según las coordenadas en la cancha
+                const { pos, type } = recalculatePlayerPosition(x, y);
+                const badge = activePin.querySelector('.player-badge');
+                if (badge) {
+                    badge.textContent = pos;
+                    badge.className = `player-badge ${type}`;
+                }
             }
 
             function stopDrag() {
+                if (activePin) {
+                    const playerName = activePin.querySelector('.player-name')?.textContent || 'Jugador';
+                    const posName = activePin.querySelector('.player-badge')?.textContent || '';
+                    showNotification(`⚡ Rol táctico de ${playerName} actualizado a: ${posName}`, 'info');
+                }
                 activePin = null;
                 document.removeEventListener('mousemove', onDrag);
                 document.removeEventListener('mouseup', stopDrag);
@@ -899,6 +998,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         chatWelcome.classList.add('hidden');
         chatMessages.classList.remove('hidden');
+
+        // Ocultar siempre la barra grande de ligas al iniciar/enviar conversación para liberar el área de chat
+        if (leagueSelectorWrapper) leagueSelectorWrapper.classList.add('hidden');
+        if (activeLeagueBadge) activeLeagueBadge.classList.remove('hidden');
 
         appendMessageDOM(text, 'user');
         const conv = conversations.find(c => c.id === activeConvId);
