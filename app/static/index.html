@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Football Assistant | MRCA Solutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- ═══════ LOGIN SCREEN ═══════ -->
+    <div id="login-screen" class="login-overlay active">
+        <div class="login-background"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="orb orb-4"></div>
+        <canvas id="particles-canvas"></canvas>
+        <div class="login-perspective">
+            <div id="login-card" class="login-card">
+                <div class="card-glow"></div>
+                <div class="card-shine"></div>
+                <div class="login-header">
+                    <div class="logo-3d"><div class="logo-sphere"><span>⚽</span></div></div>
+                    <h1>AI Football Assistant</h1>
+                    <p class="subtitle">Powered by <strong>MRCA Solutions</strong> &amp; Gemini AI</p>
+                </div>
+                <!-- Login Form -->
+                <div id="form-login" class="login-form">
+                    <div class="input-group">
+                        <label for="login-email">Correo electrónico</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <input type="email" id="login-email" placeholder="usuario@correo.com" autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Contraseña</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                            <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+                        </div>
+                    </div>
+                    <button id="login-btn" class="btn-primary gradient-btn btn-3d"><span>Iniciar Sesión</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                    <div class="divider"><span>o</span></div>
+                    <button id="guest-btn" class="btn-secondary btn-guest"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Entrar como Invitado</span></button>
+                    <p class="form-switch">¿No tienes cuenta? <a href="#" id="show-register">Regístrate</a></p>
+                </div>
+                <!-- Register Form -->
+                <div id="form-register" class="login-form hidden">
+                    <div class="input-group"><label for="reg-name">Nombre completo</label><div class="input-wrapper"><svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input type="text" id="reg-name" placeholder="Tu nombre" autocomplete="name"></div></div>
+                    <div class="input-group"><label for="reg-email">Correo electrónico</label><div class="input-wrapper"><svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><input type="email" id="reg-email" placeholder="usuario@correo.com" autocomplete="email"></div></div>
+                    <div class="input-group"><label for="reg-password">Contraseña</label><div class="input-wrapper"><svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div></div>
+                    <div class="input-group"><label for="reg-confirm">Confirmar contraseña</label><div class="input-wrapper"><svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><input type="password" id="reg-confirm" placeholder="Repite tu contraseña" autocomplete="new-password"></div></div>
+                    <button id="register-btn" class="btn-primary gradient-btn btn-3d"><span>Crear Cuenta</span></button>
+                    <p class="form-switch">¿Ya tienes cuenta? <a href="#" id="show-login">Inicia Sesión</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ MAIN APP ═══════ -->
+    <div id="main-app" class="app-layout hidden">
+        <!-- Top Navbar -->
+        <header class="top-navbar">
+            <div class="nav-left">
+                <button id="mobile-menu-btn" class="icon-btn mobile-only" aria-label="Toggle Menu">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                </button>
+                <div class="brand">
+                    <div class="brand-sphere">⚽</div>
+                    <span class="brand-name">AI Football Assistant</span>
+                </div>
+            </div>
+            <div class="nav-right">
+                <div class="user-profile">
+                    <div class="avatar"><span id="user-initial">I</span></div>
+                    <span id="display-name">Invitado</span>
+                </div>
+                <button id="logout-btn" class="btn-outline-sm">Cerrar sesión</button>
+            </div>
+        </header>
+
+        <div class="app-body">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="sidebar">
+                <button id="new-chat-btn" class="new-chat-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>Nuevo chat</span>
+                </button>
+
+                <div class="sidebar-section">
+                    <p class="sidebar-label">Historial</p>
+                    <div id="chat-history-list" class="chat-history-list custom-scrollbar">
+                        <!-- Dynamic chat history items -->
+                    </div>
+                </div>
+
+                <nav class="side-nav">
+                    <button class="nav-item active" data-target="chat-view">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                        <span>Chat IA</span>
+                    </button>
+                    <button class="nav-item" data-target="vision-view">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>Visión / Cédulas</span>
+                    </button>
+                    <button class="nav-item" data-target="about-view">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                        <span>Acerca de</span>
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- ═══ CHAT VIEW ═══ -->
+                <section id="chat-view" class="view-section active">
+                    <div class="chat-container">
+                        <!-- Welcome (shown when no messages) -->
+                        <div id="chat-welcome" class="chat-welcome custom-scrollbar">
+                            <div class="welcome-icon">⚽</div>
+                            <h2>¿En qué puedo ayudarte hoy?</h2>
+                            <p>Soy tu director técnico virtual con IA. Pregúntame sobre tácticas, alineaciones, estadísticas o cualquier tema de fútbol.</p>
+                            <div class="suggestion-grid">
+                                <button class="suggestion-card" data-prompt="Dame una alineación 4-3-3 del Real Madrid adaptada contra presión alta">
+                                    <div class="sc-icon">📋</div>
+                                    <div class="sc-text"><strong>Alineación Táctica</strong><span>Real Madrid 4-3-3 vs Presión</span></div>
+                                </button>
+                                <button class="suggestion-card" data-prompt="Compara las estadísticas y estilo de juego de Haaland vs Mbappé">
+                                    <div class="sc-icon">📊</div>
+                                    <div class="sc-text"><strong>Comparar Jugadores</strong><span>Haaland vs Mbappé</span></div>
+                                </button>
+                                <button class="suggestion-card" data-prompt="¿Cómo contrarrestar el estilo 'Tiki-Taka' de posesión extrema en un partido importante?">
+                                    <div class="sc-icon">🧠</div>
+                                    <div class="sc-text"><strong>Estrategia Táctica</strong><span>Contrarrestar Posesión</span></div>
+                                </button>
+                                <button class="suggestion-card" data-prompt="Diseña un plan de preparación física semanal de pretemporada para mejorar la resistencia">
+                                    <div class="sc-icon">🏋️</div>
+                                    <div class="sc-text"><strong>Plan Físico</strong><span>Resistencia Pretemporada</span></div>
+                                </button>
+                                <button class="suggestion-card" data-prompt="Explica detalladamente cuándo se pita fuera de juego pasivo según el reglamento oficial de la FIFA">
+                                    <div class="sc-icon">👨‍⚖️</div>
+                                    <div class="sc-text"><strong>Reglamento FIFA</strong><span>Fuera de Juego Pasivo</span></div>
+                                </button>
+                                <button class="suggestion-card" data-prompt="¿Qué es el xG (Goles Esperados) y cómo se calcula en el análisis de datos de un partido?">
+                                    <div class="sc-icon">📈</div>
+                                    <div class="sc-text"><strong>Análisis xG</strong><span>Goles Esperados explicados</span></div>
+                                </button>
+                                <button class="suggestion-card" data-prompt="Mencióname los 5 mejores mediocentros jóvenes sub-21 de Sudamérica con mayor proyección">
+                                    <div class="sc-icon">🔍</div>
+                                    <div class="sc-text"><strong>Scouting Joven</strong><span>Promesas Sub-21 Sudamérica</span></div>
+                                </button>
+                                <button class="suggestion-card" data-prompt="Haz un resumen de la final del Mundial de 1970 entre Brasil e Italia y sus claves históricas">
+                                    <div class="sc-icon">🏆</div>
+                                    <div class="sc-text"><strong>Historia del Fútbol</strong><span>Brasil vs Italia 1970</span></div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Messages Area -->
+                        <div id="chat-messages" class="chat-messages custom-scrollbar"></div>
+
+                        <!-- Input Bar -->
+                        <div class="chat-input-bar">
+                            <form id="chat-form" class="chat-input-form">
+                                <div class="input-box">
+                                    <textarea id="chat-input" placeholder="Escribe tu pregunta sobre fútbol..." rows="1" class="custom-scrollbar"></textarea>
+                                    <button type="submit" id="send-msg-btn" class="send-btn" disabled aria-label="Enviar">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                                    </button>
+                                </div>
+                                <p class="disclaimer">La IA puede cometer errores. Verifica la información importante.</p>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══ VISION VIEW ═══ -->
+                <section id="vision-view" class="view-section hidden">
+                    <div class="vision-container custom-scrollbar">
+                        <div class="view-header">
+                            <div class="header-icon">📋</div>
+                            <h2>Análisis de Cédulas Arbitrales</h2>
+                            <p>Sube una imagen de una cédula deportiva o acta de partido. La IA extraerá los datos y los guardará automáticamente.</p>
+                        </div>
+                        <div class="vision-workspace">
+                            <div class="upload-zone" id="drop-zone">
+                                <input type="file" id="file-input" accept="image/*" hidden>
+                                <div class="upload-content" id="upload-prompt">
+                                    <div class="upload-anim">
+                                        <div class="upload-ring"></div>
+                                        <div class="upload-icon-inner">📸</div>
+                                    </div>
+                                    <h3>Arrastra una imagen aquí</h3>
+                                    <p>o haz clic para seleccionar</p>
+                                    <span class="file-hint">JPG, PNG, WEBP • Máx 10MB</span>
+                                </div>
+                                <div class="preview-content hidden" id="image-preview-container">
+                                    <img id="image-preview" src="" alt="Preview">
+                                    <button id="remove-image-btn" class="remove-btn" aria-label="Quitar imagen">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="action-bar">
+                                <button id="process-vision-btn" class="btn-primary gradient-btn btn-3d w-full" disabled>
+                                    <span class="btn-text">🔍 Analizar Cédula con IA</span>
+                                    <span class="spinner hidden"></span>
+                                </button>
+                            </div>
+                            <div id="vision-results" class="results-card hidden">
+                                <div class="results-header">
+                                    <h3>📊 Resultados del Análisis</h3>
+                                    <span class="results-badge">Procesado con Gemini</span>
+                                </div>
+                                <div id="vision-output" class="vision-output"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══ ABOUT VIEW ═══ -->
+                <section id="about-view" class="view-section hidden">
+                    <div class="about-container custom-scrollbar">
+                        <div class="about-hero">
+                            <div class="about-logo">⚽</div>
+                            <h2>AI Football Assistant</h2>
+                            <p class="about-sub">Plataforma de inteligencia artificial deportiva</p>
+                        </div>
+                        <div class="features-grid">
+                            <div class="feature-card-3d">
+                                <div class="fc-icon">🧠</div>
+                                <h3>Director Técnico IA</h3>
+                                <p>Crea formaciones tácticas (4-3-3, 4-4-2, 3-5-2), analiza jugadores y genera estrategias basadas en datos reales de ligas mundiales.</p>
+                            </div>
+                            <div class="feature-card-3d">
+                                <div class="fc-icon">👁️</div>
+                                <h3>Visión Artificial</h3>
+                                <p>Procesa cédulas arbitrales con Gemini Vision. Extrae automáticamente equipos, goles, tarjetas e incidencias del partido.</p>
+                            </div>
+                            <div class="feature-card-3d">
+                                <div class="fc-icon">📊</div>
+                                <h3>Analista de Datos</h3>
+                                <p>Estadísticas avanzadas: xG, posesión, pases completados, presión alta. Comparativas históricas de jugadores y equipos.</p>
+                            </div>
+                            <div class="feature-card-3d">
+                                <div class="fc-icon">🔗</div>
+                                <h3>Integración Supabase</h3>
+                                <p>Los datos extraídos se almacenan automáticamente en PostgreSQL via Supabase para consultas y reportes posteriores.</p>
+                            </div>
+                        </div>
+                        <div class="tech-stack">
+                            <p class="tech-label">Stack Tecnológico</p>
+                            <div class="tech-badges">
+                                <span class="tech-badge">FastAPI</span>
+                                <span class="tech-badge">Python 3.10+</span>
+                                <span class="tech-badge">Gemini 2.5 Flash</span>
+                                <span class="tech-badge">Supabase</span>
+                                <span class="tech-badge">Pydantic</span>
+                            </div>
+                        </div>
+                        <div class="system-info">
+                            <p>Versión 1.0.0 • MRCA Solutions © 2026</p>
+                            <p>Desarrollado para evaluación del Prof. Marcial Jesús Martínez Blas</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+    <script src="/static/script.js"></script>
+</body>
+</html>

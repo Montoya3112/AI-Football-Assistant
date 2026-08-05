@@ -1,0 +1,26 @@
+# Entorno de Python y Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# Archivos de Entorno y Claves Secretas
+.env
+.env.local
+*.pem
+*.key
+
+# Logs y Temporales
+*.log
+scratch/
+.system_generated/
+
+# IDE y Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
