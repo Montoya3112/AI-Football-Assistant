@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let conversations = [];
     let activeConvId = null;
     let lastExtractedCedula = null;
+    let lastUserPrompt = '';
 
     // ═══ INIT ═══
     function init() {
@@ -166,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ════════════════════════════════════════
-    // HERRAMIENTAS DE EXPORTACIÓN (PDF, EXCEL/CSV, TXT)
+    // HERRAMIENTAS DE EXPORTACIÓN CON CANCHA EN PDF
     // ════════════════════════════════════════
     function exportToPDF() {
         const conv = conversations.find(c => c.id === activeConvId);
@@ -182,31 +183,71 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(16);
-                doc.text("AI Football Assistant - Reporte Táctico", 14, 20);
+                doc.text("AI Football Assistant - Reporte Táctico Oficial", 14, 18);
                 
-                doc.setFontSize(10);
+                doc.setFontSize(9);
                 doc.setFont("helvetica", "normal");
-                doc.text(`Usuario: ${currentUser || 'Invitado'} | Fecha: ${new Date().toLocaleDateString()}`, 14, 28);
-                doc.line(14, 32, 196, 32);
+                doc.text(`Usuario: ${currentUser || 'Invitado'} | Generado: ${new Date().toLocaleString()}`, 14, 25);
+                doc.line(14, 28, 196, 28);
 
-                let y = 40;
+                let y = 36;
                 conv.messages.forEach(m => {
                     const prefix = m.sender === 'user' ? `[${currentUser}]: ` : '[AI DT]: ';
                     const cleanText = m.text.replace(/[\*\#\`]/g, '');
                     const lines = doc.splitTextToSize(prefix + cleanText, 175);
                     
-                    if (y + (lines.length * 6) > 280) {
+                    if (y + (lines.length * 5) > 270) {
                         doc.addPage();
                         y = 20;
                     }
                     
                     doc.setFont("helvetica", m.sender === 'user' ? "bold" : "normal");
                     doc.text(lines, 14, y);
-                    y += (lines.length * 6) + 4;
+                    y += (lines.length * 5) + 4;
+
+                    // Si la respuesta incluye una formación táctica, dibujar la Pizarra Táctica en el PDF
+                    if (m.sender === 'bot' && (m.text.includes('4-3-3') || m.text.includes('4-4-2') || m.text.includes('3-5-2') || m.text.includes('4-2-3-1'))) {
+                        if (y + 75 > 270) { doc.addPage(); y = 20; }
+                        
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(10);
+                        doc.text("⚽ PIZARRA TÁCTICA Y PARADO DE NOMBRES EN EL CAMPO:", 14, y);
+                        y += 6;
+
+                        // Dibujar campo verde
+                        doc.setFillColor(15, 60, 30);
+                        doc.roundedRect(14, y, 182, 60, 3, 3, 'F');
+                        doc.setDrawColor(255, 255, 255);
+                        doc.setLineWidth(0.4);
+                        doc.rect(18, y + 3, 174, 54);
+                        doc.line(105, y + 3, 105, y + 57);
+                        doc.circle(105, y + 30, 12);
+
+                        // Dibujar jugadores
+                        const pitchData = getFormationData(m.text);
+                        if (pitchData) {
+                            pitchData.players.forEach(p => {
+                                const px = 18 + (p.x / 100) * 174;
+                                const py = y + 3 + (p.y / 100) * 54;
+                                
+                                doc.setFillColor(p.type === 'gk' ? 245 : p.type === 'df' ? 59 : p.type === 'mf' ? 139 : 16,
+                                                 p.type === 'gk' ? 158 : p.type === 'df' ? 130 : p.type === 'mf' ? 92 : 185,
+                                                 p.type === 'gk' ? 11 : p.type === 'df' ? 246 : p.type === 'mf' ? 246 : 129);
+                                doc.circle(px, py, 3.5, 'F');
+                                doc.setFontSize(6.5);
+                                doc.setFont("helvetica", "bold");
+                                doc.setTextColor(255, 255, 255);
+                                doc.text(p.name.substring(0, 10), px, py + 6, { align: 'center' });
+                            });
+                        }
+
+                        doc.setTextColor(0, 0, 0);
+                        y += 68;
+                    }
                 });
 
-                doc.save(`Reporte_Futbol_${Date.now()}.pdf`);
-                showNotification('PDF descargado correctamente 📄', 'success');
+                doc.save(`Reporte_Tactico_Futbol_${Date.now()}.pdf`);
+                showNotification('PDF con Pizarra Táctica descargado correctamente 📄', 'success');
             } else {
                 window.print();
             }
@@ -388,70 +429,93 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ════════════════════════════════════════
-    // CANCHA TÁCTICA 3D VISUALIZER
+    // CANCHA TÁCTICA 3D CON NOMBRES REALES Y AJUSTABLE (DRAG & DROP)
     // ════════════════════════════════════════
-    function generateTacticalPitchHTML(text) {
+    function getFormationData(text) {
+        const defaultNames = {
+            '4-3-3': ['Courtois', 'Mendy', 'Rüdiger', 'Militão', 'Carvajal', 'Tchouaméni', 'Valverde', 'Bellingham', 'Vinícius Jr.', 'Mbappé', 'Rodrygo'],
+            '4-4-2': ['Ter Stegen', 'Balde', 'Araújo', 'Cubarsí', 'Koundé', 'Raphinha', 'Pedri', 'De Jong', 'Yamal', 'Lewandowski', 'Olmo'],
+            '3-5-2': ['Sommer', 'Bastoni', 'Acerbi', 'Pavard', 'Dimarco', 'Barella', 'Calhanoglu', 'Mkhitaryan', 'Dumfries', 'Lautaro', 'Thuram'],
+            '4-2-3-1': ['Neuer', 'Davies', 'Kim', 'Upamecano', 'Kimmich', 'Goretzka', 'Pavlovic', 'Musiala', 'Müller', 'Sané', 'Kane']
+        };
+
         const formations = {
             '4-3-3': [
-                { pos: 'POR', name: 'Portero', y: 88, x: 50, type: 'gk' },
-                { pos: 'LI', name: 'Lat. Izq.', y: 70, x: 18, type: 'df' },
-                { pos: 'DFC', name: 'Def. Central', y: 74, x: 38, type: 'df' },
-                { pos: 'DFC', name: 'Def. Central', y: 74, x: 62, type: 'df' },
-                { pos: 'LD', name: 'Lat. Der.', y: 70, x: 82, type: 'df' },
-                { pos: 'MCD', name: 'Pivote Def.', y: 52, x: 50, type: 'mf' },
-                { pos: 'MC', name: 'Interior Izq.', y: 44, x: 30, type: 'mf' },
-                { pos: 'MC', name: 'Interior Der.', y: 44, x: 70, type: 'mf' },
-                { pos: 'EI', name: 'Extr. Izq.', y: 22, x: 20, type: 'fw' },
-                { pos: 'DC', name: 'Delantero', y: 16, x: 50, type: 'fw' },
-                { pos: 'ED', name: 'Extr. Der.', y: 22, x: 80, type: 'fw' },
+                { pos: 'POR', y: 88, x: 50, type: 'gk' },
+                { pos: 'LI', y: 70, x: 18, type: 'df' },
+                { pos: 'DFC', y: 74, x: 38, type: 'df' },
+                { pos: 'DFC', y: 74, x: 62, type: 'df' },
+                { pos: 'LD', y: 70, x: 82, type: 'df' },
+                { pos: 'MCD', y: 52, x: 50, type: 'mf' },
+                { pos: 'MC', y: 44, x: 30, type: 'mf' },
+                { pos: 'MC', y: 44, x: 70, type: 'mf' },
+                { pos: 'EI', y: 22, x: 20, type: 'fw' },
+                { pos: 'DC', y: 16, x: 50, type: 'fw' },
+                { pos: 'ED', y: 22, x: 80, type: 'fw' },
             ],
             '4-4-2': [
-                { pos: 'POR', name: 'Portero', y: 88, x: 50, type: 'gk' },
-                { pos: 'LI', name: 'Lat. Izq.', y: 70, x: 18, type: 'df' },
-                { pos: 'DFC', name: 'Def. Central', y: 74, x: 38, type: 'df' },
-                { pos: 'DFC', name: 'Def. Central', y: 74, x: 62, type: 'df' },
-                { pos: 'LD', name: 'Lat. Der.', y: 70, x: 82, type: 'df' },
-                { pos: 'MI', name: 'Volante Izq.', y: 46, x: 18, type: 'mf' },
-                { pos: 'MC', name: 'Medio Centro', y: 50, x: 38, type: 'mf' },
-                { pos: 'MC', name: 'Medio Centro', y: 50, x: 62, type: 'mf' },
-                { pos: 'MD', name: 'Volante Der.', y: 46, x: 82, type: 'mf' },
-                { pos: 'DC', name: 'Delantero', y: 20, x: 38, type: 'fw' },
-                { pos: 'DC', name: 'Delantero', y: 20, x: 62, type: 'fw' },
+                { pos: 'POR', y: 88, x: 50, type: 'gk' },
+                { pos: 'LI', y: 70, x: 18, type: 'df' },
+                { pos: 'DFC', y: 74, x: 38, type: 'df' },
+                { pos: 'DFC', y: 74, x: 62, type: 'df' },
+                { pos: 'LD', y: 70, x: 82, type: 'df' },
+                { pos: 'MI', y: 46, x: 18, type: 'mf' },
+                { pos: 'MC', y: 50, x: 38, type: 'mf' },
+                { pos: 'MC', y: 50, x: 62, type: 'mf' },
+                { pos: 'MD', y: 46, x: 82, type: 'mf' },
+                { pos: 'DC', y: 20, x: 38, type: 'fw' },
+                { pos: 'DC', y: 20, x: 62, type: 'fw' },
             ],
             '3-5-2': [
-                { pos: 'POR', name: 'Portero', y: 88, x: 50, type: 'gk' },
-                { pos: 'DFC', name: 'Central Izq.', y: 74, x: 26, type: 'df' },
-                { pos: 'DFC', name: 'Central Lib.', y: 76, x: 50, type: 'df' },
-                { pos: 'DFC', name: 'Central Der.', y: 74, x: 74, type: 'df' },
-                { pos: 'CAD', name: 'Carrilero Izq.', y: 48, x: 14, type: 'mf' },
-                { pos: 'MC', name: 'Medio Centro', y: 52, x: 36, type: 'mf' },
-                { pos: 'MCD', name: 'Pivote', y: 56, x: 50, type: 'mf' },
-                { pos: 'MC', name: 'Medio Centro', y: 52, x: 64, type: 'mf' },
-                { pos: 'CAD', name: 'Carrilero Der.', y: 48, x: 86, type: 'mf' },
-                { pos: 'DC', name: 'Delantero', y: 20, x: 38, type: 'fw' },
-                { pos: 'DC', name: 'Delantero', y: 20, x: 62, type: 'fw' },
+                { pos: 'POR', y: 88, x: 50, type: 'gk' },
+                { pos: 'DFC', y: 74, x: 26, type: 'df' },
+                { pos: 'DFC', y: 76, x: 50, type: 'df' },
+                { pos: 'DFC', y: 74, x: 74, type: 'df' },
+                { pos: 'CAD', y: 48, x: 14, type: 'mf' },
+                { pos: 'MC', y: 52, x: 36, type: 'mf' },
+                { pos: 'MCD', y: 56, x: 50, type: 'mf' },
+                { pos: 'MC', y: 52, x: 64, type: 'mf' },
+                { pos: 'CAD', y: 48, x: 86, type: 'mf' },
+                { pos: 'DC', y: 20, x: 38, type: 'fw' },
+                { pos: 'DC', y: 20, x: 62, type: 'fw' },
             ],
             '4-2-3-1': [
-                { pos: 'POR', name: 'Portero', y: 88, x: 50, type: 'gk' },
-                { pos: 'LI', name: 'Lat. Izq.', y: 70, x: 18, type: 'df' },
-                { pos: 'DFC', name: 'Def. Central', y: 74, x: 38, type: 'df' },
-                { pos: 'DFC', name: 'Def. Central', y: 74, x: 62, type: 'df' },
-                { pos: 'LD', name: 'Lat. Der.', y: 70, x: 82, type: 'df' },
-                { pos: 'MCD', name: 'Pivote 1', y: 54, x: 36, type: 'mf' },
-                { pos: 'MCD', name: 'Pivote 2', y: 54, x: 64, type: 'mf' },
-                { pos: 'MI', name: 'Extr. Izq.', y: 34, x: 20, type: 'mf' },
-                { pos: 'MCO', name: 'Media Punta', y: 32, x: 50, type: 'mf' },
-                { pos: 'MD', name: 'Extr. Der.', y: 34, x: 80, type: 'mf' },
-                { pos: 'DC', name: 'Delantero', y: 16, x: 50, type: 'fw' },
+                { pos: 'POR', y: 88, x: 50, type: 'gk' },
+                { pos: 'LI', y: 70, x: 18, type: 'df' },
+                { pos: 'DFC', y: 74, x: 38, type: 'df' },
+                { pos: 'DFC', y: 74, x: 62, type: 'df' },
+                { pos: 'LD', y: 70, x: 82, type: 'df' },
+                { pos: 'MCD', y: 54, x: 36, type: 'mf' },
+                { pos: 'MCD', y: 54, x: 64, type: 'mf' },
+                { pos: 'MI', y: 34, x: 20, type: 'mf' },
+                { pos: 'MCO', y: 32, x: 50, type: 'mf' },
+                { pos: 'MD', y: 34, x: 80, type: 'mf' },
+                { pos: 'DC', y: 16, x: 50, type: 'fw' },
             ]
         };
 
         const key = Object.keys(formations).find(f => text.includes(f));
-        if (!key) return '';
+        if (!key) return null;
 
-        const players = formations[key];
-        const playersHTML = players.map(p => `
-            <div class="player-pin" style="top:${p.y}%; left:${p.x}%;" title="${p.name}">
+        const basePlayers = formations[key];
+        const names = defaultNames[key] || [];
+
+        const playersWithNames = basePlayers.map((p, idx) => ({
+            ...p,
+            name: names[idx] || `${p.pos} ${idx + 1}`
+        }));
+
+        return { key, players: playersWithNames };
+    }
+
+    function generateTacticalPitchHTML(text) {
+        const formationData = getFormationData(text);
+        if (!formationData) return '';
+
+        const { key, players } = formationData;
+
+        const playersHTML = players.map((p, idx) => `
+            <div class="player-pin" style="top:${p.y}%; left:${p.x}%;" title="${p.name} (${p.pos})">
                 <div class="player-badge ${p.type}">${p.pos}</div>
                 <span class="player-name">${p.name}</span>
             </div>
@@ -462,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="pitch-card">
                     <div class="pitch-header">
                         <div class="pitch-title">
-                            ⚽ Pizarra Táctica 3D Interactiva
+                            ⚽ Pizarra Táctica 3D Interactiva & Ajustable
                         </div>
                         <span class="pitch-badge-tag">Formación ${key}</span>
                     </div>
@@ -473,9 +537,57 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="field-area-bottom"></div>
                         ${playersHTML}
                     </div>
+                    <p class="pitch-instruction">🖐️ Puedes arrastrar y mover las fichas de los jugadores en la cancha para ajustar tu táctica.</p>
                 </div>
             </div>
         `;
+    }
+
+    function initPitchDraggableEvents() {
+        document.querySelectorAll('.soccer-field').forEach(field => {
+            if (field.dataset.dragInit) return;
+            field.dataset.dragInit = "true";
+
+            let activePin = null;
+
+            field.querySelectorAll('.player-pin').forEach(pin => {
+                pin.addEventListener('mousedown', startDrag);
+                pin.addEventListener('touchstart', startDrag, { passive: false });
+            });
+
+            function startDrag(e) {
+                e.preventDefault();
+                activePin = this;
+                document.addEventListener('mousemove', onDrag);
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchmove', onDrag, { passive: false });
+                document.addEventListener('touchend', stopDrag);
+            }
+
+            function onDrag(e) {
+                if (!activePin) return;
+                const rect = field.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                let x = ((clientX - rect.left) / rect.width) * 100;
+                let y = ((clientY - rect.top) / rect.height) * 100;
+
+                x = Math.max(5, Math.min(95, x));
+                y = Math.max(5, Math.min(95, y));
+
+                activePin.style.left = `${x}%`;
+                activePin.style.top = `${y}%`;
+            }
+
+            function stopDrag() {
+                activePin = null;
+                document.removeEventListener('mousemove', onDrag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchmove', onDrag);
+                document.removeEventListener('touchend', stopDrag);
+            }
+        });
     }
 
     // ════════════════════════════════════════
@@ -738,8 +850,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.style.height = Math.min(chatInput.scrollHeight, 140) + 'px';
     }
 
-    let lastUserPrompt = '';
-
     function shouldShowTacticalPitch(userPrompt, text) {
         if (!userPrompt || !text) return false;
         const p = userPrompt.toLowerCase();
@@ -821,6 +931,8 @@ document.addEventListener('DOMContentLoaded', () => {
         div.innerHTML = `<div class="message-avatar">${avatar}</div><div class="message-content">${formatted}</div>`;
         chatMessages.appendChild(div);
         scrollToBottom();
+
+        setTimeout(initPitchDraggableEvents, 100);
     }
 
     function showTypingIndicator() {
