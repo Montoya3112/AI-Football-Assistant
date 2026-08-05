@@ -1106,13 +1106,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         newChatBtn.addEventListener('click', createNewChat);
 
-        // Selector de Ligas Top 5
+        // Selector de Ligas Top 5 con Banderas de Países
         document.querySelectorAll('.league-chip').forEach(chip => {
             chip.addEventListener('click', () => {
                 document.querySelectorAll('.league-chip').forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
                 selectedLeague = chip.dataset.league;
-                showNotification(`Liga activada: ${selectedLeague} ⚽`, 'info');
+                const flag = chip.dataset.flag || '⚽';
+                const name = chip.dataset.name || selectedLeague;
+
+                showNotification(`Liga enfocada: ${flag} ${name}`, 'info');
+
+                if (selectedLeague !== 'Todas las Ligas') {
+                    switchView('chat-view');
+                    const leagueQuery = `Proporcióname los datos oficiales de la ${selectedLeague}: ¿cuándo inicia o qué fechas clave tiene su temporada actual, cuáles son los equipos destacados y pregúntame qué me gustaría analizar sobre esta liga (alineaciones, estadísticas xG, fichajes o táctica)?`;
+                    sendMessage(leagueQuery);
+                }
             });
         });
 

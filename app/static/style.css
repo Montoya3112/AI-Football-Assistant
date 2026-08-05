@@ -606,10 +606,10 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .league-chip {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
+    gap: 8px;
+    padding: 7px 16px;
     border-radius: 20px;
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 600;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
@@ -617,18 +617,32 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
     white-space: nowrap;
     transition: var(--transition);
     cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.flag-icon {
+    font-size: 16px;
+    display: inline-block;
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .league-chip:hover {
     border-color: var(--accent);
     color: var(--text-primary);
     background: var(--surface-hover);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(139,92,246,0.2);
+}
+.league-chip:hover .flag-icon {
+    transform: scale(1.35) rotate(10deg);
 }
 .league-chip.active {
-    background: var(--accent-dim);
+    background: var(--gradient-surface);
     border-color: var(--accent-hover);
     color: #fff;
-    box-shadow: 0 0 14px var(--accent-glow);
+    box-shadow: 0 0 16px var(--accent-glow), 0 2px 8px rgba(0,0,0,0.4);
+}
+.league-chip.active .flag-icon {
+    transform: scale(1.25);
+    filter: drop-shadow(0 0 6px var(--accent-glow));
 }
 
 /* Input Bar (SIEMPRE FIJO ABAJO) */

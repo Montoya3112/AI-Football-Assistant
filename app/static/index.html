@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Football Assistant | MRCA Solutions</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=1.0.6">
+    <link rel="stylesheet" href="/static/style.css?v=1.0.7">
     <!-- jsPDF for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -195,30 +195,41 @@
                         <!-- Input Bar -->
                         <div class="chat-input-bar">
                             <form id="chat-form" class="chat-input-form">
-                                <!-- SELECTOR DE LIGAS TOP 5 -->
+                                <!-- SELECTOR DE LIGAS TOP 5 CON BANDERAS DE PAÍSES -->
                                 <div class="league-selector-wrapper">
-                                    <span class="league-selector-label">🌐 Liga:</span>
+                                    <span class="league-selector-label">🌐 Ligas Top:</span>
                                     <div class="league-chips-container custom-scrollbar">
-                                        <button type="button" class="league-chip active" data-league="Todas las Ligas">
-                                            <span>⚽ Todas</span>
+                                        <button type="button" class="league-chip active" data-league="Todas las Ligas" data-flag="⚽" data-name="Todas">
+                                            <span class="flag-icon">⚽</span>
+                                            <span class="league-name">Todas las Ligas</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="LaLiga EA Sports (España)">
-                                            <span>🇪🇸 LaLiga</span>
+                                        <button type="button" class="league-chip" data-league="LaLiga EA Sports (España)" data-flag="🇪🇸" data-name="LaLiga">
+                                            <span class="flag-icon">🇪🇸</span>
+                                            <span class="league-name">LaLiga (España)</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="Premier League (Inglaterra)">
-                                            <span>🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</span>
+                                        <button type="button" class="league-chip" data-league="Premier League (Inglaterra)" data-flag="🏴󠁧󠁢󠁥󠁮󠁧󠁿" data-name="Premier League">
+                                            <span class="flag-icon">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
+                                            <span class="league-name">Premier League (Inglaterra)</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="Serie A (Italia)">
-                                            <span>🇮🇹 Serie A</span>
+                                        <button type="button" class="league-chip" data-league="Serie A (Italia)" data-flag="🇮🇹" data-name="Serie A">
+                                            <span class="flag-icon">🇮🇹</span>
+                                            <span class="league-name">Serie A (Italia)</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="Bundesliga (Alemania)">
-                                            <span>🇩🇪 Bundesliga</span>
+                                        <button type="button" class="league-chip" data-league="Bundesliga (Alemania)" data-flag="🇩🇪" data-name="Bundesliga">
+                                            <span class="flag-icon">🇩🇪</span>
+                                            <span class="league-name">Bundesliga (Alemania)</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="UEFA Champions League">
-                                            <span>🏆 Champions League</span>
+                                        <button type="button" class="league-chip" data-league="UEFA Champions League" data-flag="🏆" data-name="Champions League">
+                                            <span class="flag-icon">🏆</span>
+                                            <span class="league-name">Champions League (Europa)</span>
                                         </button>
-                                        <button type="button" class="league-chip" data-league="Liga MX (México)">
-                                            <span>🇲🇽 Liga MX</span>
+                                        <button type="button" class="league-chip" data-league="Liga MX (México)" data-flag="🇲🇽" data-name="Liga MX">
+                                            <span class="flag-icon">🇲🇽</span>
+                                            <span class="league-name">Liga MX (México)</span>
+                                        </button>
+                                        <button type="button" class="league-chip" data-league="Ligue 1 (Francia)" data-flag="🇫🇷" data-name="Ligue 1">
+                                            <span class="flag-icon">🇫🇷</span>
+                                            <span class="league-name">Ligue 1 (Francia)</span>
                                         </button>
                                     </div>
                                 </div>
@@ -456,6 +467,6 @@
 
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
-    <script src="/static/script.js?v=1.0.6"></script>
+    <script src="/static/script.js?v=1.0.7"></script>
 </body>
 </html>
