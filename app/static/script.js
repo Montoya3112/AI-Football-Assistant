@@ -27,6 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadCedulaPdfBtn = $('download-cedula-pdf-btn');
     const downloadCedulaWordBtn = $('download-cedula-word-btn');
     const triggerLearningBtn = $('trigger-learning-btn');
+    const leagueSelectorWrapper = $('league-selector-wrapper');
+    const activeLeagueBadge = $('active-league-badge');
+    const albText = $('alb-text');
+    const changeLeagueBtn = $('change-league-btn');
 
     // ═══ STATE ═══
     let currentUser = null;
@@ -695,6 +699,8 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.innerHTML = '';
         chatWelcome.classList.remove('hidden');
         chatMessages.classList.add('hidden');
+        if (leagueSelectorWrapper) leagueSelectorWrapper.classList.remove('hidden');
+        if (activeLeagueBadge) activeLeagueBadge.classList.add('hidden');
     }
 
     function renderHistory() {
@@ -1118,12 +1124,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 showNotification(`Liga enfocada: ${flag} ${name}`, 'info');
 
                 if (selectedLeague !== 'Todas las Ligas') {
+                    // Ocultar la barra grande para liberar el área de chat
+                    if (leagueSelectorWrapper) leagueSelectorWrapper.classList.add('hidden');
+                    if (activeLeagueBadge) {
+                        activeLeagueBadge.classList.remove('hidden');
+                        if (albText) albText.textContent = `${flag} ${selectedLeague}`;
+                    }
+
                     switchView('chat-view');
                     const leagueQuery = `Proporcióname los datos oficiales de la ${selectedLeague}: ¿cuándo inicia o qué fechas clave tiene su temporada actual, cuáles son los equipos destacados y pregúntame qué me gustaría analizar sobre esta liga (alineaciones, estadísticas xG, fichajes o táctica)?`;
                     sendMessage(leagueQuery);
+                } else {
+                    if (leagueSelectorWrapper) leagueSelectorWrapper.classList.remove('hidden');
+                    if (activeLeagueBadge) activeLeagueBadge.classList.add('hidden');
                 }
             });
         });
+
+        if (changeLeagueBtn) {
+            changeLeagueBtn.addEventListener('click', () => {
+                if (leagueSelectorWrapper) leagueSelectorWrapper.classList.remove('hidden');
+                if (activeLeagueBadge) activeLeagueBadge.classList.add('hidden');
+            });
+        }
 
         // Chat Export Buttons
         if (exportPdfBtn) exportPdfBtn.addEventListener('click', exportToPDF);

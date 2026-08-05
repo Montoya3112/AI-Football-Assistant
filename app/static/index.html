@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Football Assistant | MRCA Solutions</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=1.0.7">
+    <link rel="stylesheet" href="/static/style.css?v=1.0.8">
     <!-- jsPDF for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -196,7 +196,7 @@
                         <div class="chat-input-bar">
                             <form id="chat-form" class="chat-input-form">
                                 <!-- SELECTOR DE LIGAS TOP 5 CON BANDERAS DE PAÍSES -->
-                                <div class="league-selector-wrapper">
+                                <div id="league-selector-wrapper" class="league-selector-wrapper">
                                     <span class="league-selector-label">🌐 Ligas Top:</span>
                                     <div class="league-chips-container custom-scrollbar">
                                         <button type="button" class="league-chip active" data-league="Todas las Ligas" data-flag="⚽" data-name="Todas">
@@ -232,6 +232,15 @@
                                             <span class="league-name">Ligue 1 (Francia)</span>
                                         </button>
                                     </div>
+                                </div>
+
+                                <!-- BADGE COMPACTO DE LIGA SELECCIONADA -->
+                                <div id="active-league-badge" class="active-league-badge hidden">
+                                    <span class="alb-label">Liga activa:</span>
+                                    <span id="alb-text" class="alb-text">🇪🇸 LaLiga (España)</span>
+                                    <button type="button" id="change-league-btn" class="change-league-btn" title="Cambiar liga de preferencia">
+                                        ✏️ Cambiar Liga
+                                    </button>
                                 </div>
 
                                 <div class="input-box">
@@ -467,6 +476,6 @@
 
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
-    <script src="/static/script.js?v=1.0.7"></script>
+    <script src="/static/script.js?v=1.0.8"></script>
 </body>
 </html>
