@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportTxtBtn = $('export-txt-btn');
     const downloadCedulaPdfBtn = $('download-cedula-pdf-btn');
     const downloadCedulaWordBtn = $('download-cedula-word-btn');
+    const triggerLearningBtn = $('trigger-learning-btn');
 
     // ═══ STATE ═══
     let currentUser = null;
@@ -188,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 doc.setFontSize(9);
                 doc.setFont("helvetica", "normal");
                 doc.text(`Usuario: ${currentUser || 'Invitado'} | Generado: ${new Date().toLocaleString()}`, 14, 25);
-                doc.line(14, 28, 196, 28);
+                doc.line(14, 32, 196, 32);
 
                 let y = 36;
                 conv.messages.forEach(m => {
@@ -214,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         doc.text("⚽ PIZARRA TÁCTICA Y PARADO DE NOMBRES EN EL CAMPO:", 14, y);
                         y += 6;
 
-                        // Dibujar campo verde
                         doc.setFillColor(15, 60, 30);
                         doc.roundedRect(14, y, 182, 60, 3, 3, 'F');
                         doc.setDrawColor(255, 255, 255);
@@ -223,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         doc.line(105, y + 3, 105, y + 57);
                         doc.circle(105, y + 30, 12);
 
-                        // Dibujar jugadores
                         const pitchData = getFormationData(m.text);
                         if (pitchData) {
                             pitchData.players.forEach(p => {
@@ -1087,6 +1086,39 @@ document.addEventListener('DOMContentLoaded', () => {
         // Vision Export Buttons
         if (downloadCedulaPdfBtn) downloadCedulaPdfBtn.addEventListener('click', downloadCedulaPDF);
         if (downloadCedulaWordBtn) downloadCedulaWordBtn.addEventListener('click', downloadCedulaWord);
+
+        // Simulator para Red Neuronal 4D en Acerca de
+        if (triggerLearningBtn) {
+            triggerLearningBtn.addEventListener('click', () => {
+                const weightsEl = $('nn-weights');
+                const accEl = $('nn-acc');
+                const latencyEl = $('nn-latency');
+                const statusEl = $('nn-status');
+
+                if (statusEl) {
+                    statusEl.textContent = '⚡ Ajustando Pesos Neuronal 4D...';
+                    statusEl.className = 'm-val cyan';
+                }
+
+                document.querySelectorAll('.pulse-node').forEach(n => {
+                    n.style.animation = 'nodePulse 0.4s infinite ease-in-out';
+                });
+
+                setTimeout(() => {
+                    if (weightsEl) weightsEl.textContent = (1750000 + Math.floor(Math.random() * 50000)).toLocaleString();
+                    if (accEl) accEl.textContent = (99.4 + (Math.random() * 0.4)).toFixed(1) + '%';
+                    if (latencyEl) latencyEl.textContent = (0.15 + (Math.random() * 0.1)).toFixed(2) + 's';
+                    if (statusEl) {
+                        statusEl.textContent = '● Aprendizaje Optimizado 4D';
+                        statusEl.className = 'm-val green';
+                    }
+                    document.querySelectorAll('.pulse-node').forEach(n => {
+                        n.style.animation = 'nodePulse 3s infinite ease-in-out';
+                    });
+                    showNotification('¡Simulación de Aprendizaje 4D Completada! Pesos Neuronales Ajustados ✅', 'success');
+                }, 1500);
+            });
+        }
 
         // Presets de Motivación
         document.querySelectorAll('.btn-motivation-preset').forEach(btn => {
